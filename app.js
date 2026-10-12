@@ -34,9 +34,18 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 const defaultItems = () => [
   { id: uid(), date: '2026-11-21', category: '航班', flightId: 'f1', name: 'VN680 KUL → HAN' },
   { id: uid(), date: '2026-11-21', category: '航班', flightId: 'f2', name: 'VN334 HAN → KIX' },
-  { id: uid(), date: '2026-11-22', category: '住宿', name: 'Daiya Ryokan 寄放行李 / 入住', address: 'Daiya Ryokan Kyoto', lat: 34.9877, lng: 135.7587, hours: 'Check-in 15:00', note: '關西機場 06:55 抵達後前往京都' },
-  { id: uid(), date: '2026-11-22', category: '其他', name: '（待安排）', note: '' },
-  { id: uid(), date: '2026-11-23', category: '景點', name: '（待安排）', note: '' },
+  { id: uid(), date: '2026-11-22', category: '住宿', name: 'Daiya Ryokan 寄放行李 / 入住', address: 'Daiya Ryokan Kyoto', lat: 34.9877, lng: 135.7587, hours: 'Check-in 15:00', note: '06:55 抵達 KIX → 約 09:00–09:30 搭 JR Haruka 到京都站（約 75 分）。先寄放行李（請提前聯絡旅館），約 15:00 才能入住' },
+  { id: uid(), date: '2026-11-22', category: '景點', name: '伏見稻荷大社', address: 'Fushimi Inari Taisha, Kyoto', lat: 34.9671, lng: 135.7727, hours: '24 小時開放', ticket: '免費', note: 'JR 奈良線「稻荷」站下車。千本鳥居走到四辻看市景即可，午餐可吃參道攤販的稻荷壽司' },
+  { id: uid(), date: '2026-11-22', category: '景點', name: '東福寺', address: 'Tofuku-ji, Kyoto', lat: 34.9768, lng: 135.7740, hours: '紅葉季約 08:30 – 16:30', ticket: '通天橋 紅葉季約 ¥1,000（以官網為準）', note: '稻荷站搭 JR 奈良線 1 站。通天橋紅葉是重點，中午前後最擠，建議 13:30 後入場' },
+  { id: uid(), date: '2026-11-22', category: '景點', name: '清水寺', address: 'Kiyomizu-dera, Kyoto', lat: 34.9949, lng: 135.7850, hours: '約 06:00 – 18:00（秋季可能有夜間特別參拜）', ticket: '約 ¥500', note: '舞台俯瞰紅葉主打景點。人多，建議下午抵達、順便等日落；夜間特別參拜日期請查官網' },
+  { id: uid(), date: '2026-11-22', category: '景點', name: '二年坂・產寧坂', address: 'Sannenzaka, Kyoto', lat: 34.9979, lng: 135.7800, hours: '商店多數 約 10:00 – 17:30', ticket: '免費', note: '清水寺下坡沿路散步、買伴手禮與抹茶甜點' },
+  { id: uid(), date: '2026-11-22', category: '美食', name: '晚餐（待定）', note: '祇園 / 河原町一帶' },
+  { id: uid(), date: '2026-11-23', category: '景點', name: '嵐山竹林小徑', address: 'Arashiyama Bamboo Forest, Kyoto', lat: 35.0170, lng: 135.6713, hours: '24 小時開放', ticket: '免費', note: '人潮多，建議 07:30 前到；順路可看野宮神社（免費）' },
+  { id: uid(), date: '2026-11-23', category: '景點', name: '天龍寺', address: 'Tenryu-ji, Kyoto', lat: 35.0158, lng: 135.6738, hours: '約 08:30 – 17:00', ticket: '庭園 約 ¥500', note: '曹源池庭園紅葉；北門出口直通竹林' },
+  { id: uid(), date: '2026-11-23', category: '景點', name: '大河內山莊庭園', address: 'Okochi Sanso Garden, Kyoto', lat: 35.0183, lng: 135.6747, hours: '約 09:00 – 17:00', ticket: '約 ¥1,000（含抹茶與和菓子）', note: '可遠眺京都市區與紅葉的庭園' },
+  { id: uid(), date: '2026-11-23', category: '景點', name: '常寂光寺', address: 'Jojakkoji, Kyoto', lat: 35.0197, lng: 135.6642, hours: '約 09:00 – 17:00', ticket: '約 ¥500', note: '嵐山賞楓名所，仁王門與多寶塔配紅葉很上相，坡道較多' },
+  { id: uid(), date: '2026-11-23', category: '景點', name: '渡月橋', address: 'Togetsukyo Bridge, Kyoto', lat: 35.0094, lng: 135.6779, hours: '24 小時', ticket: '免費', note: '嵐山地標，傍晚的河岸與山景很美' },
+  { id: uid(), date: '2026-11-23', category: '美食', name: '嵐山午餐（待定）', note: '湯豆腐 / 蕎麥麵 / 抹茶甜點' },
   { id: uid(), date: '2026-11-24', category: '住宿', name: 'Ebisu 804 入住', address: 'Ebisuhonmachi Naniwa Osaka', lat: 34.6537, lng: 135.5013, hours: 'Check-in 15:00', note: '上午退房 Daiya Ryokan，前往大阪' },
   { id: uid(), date: '2026-11-25', category: '景點', name: '（待安排）', note: '' },
   { id: uid(), date: '2026-11-26', category: '景點', name: '（待安排）', note: '' },
@@ -408,7 +417,7 @@ createApp({
     const sortedExp = computed(() => [...exps.value].sort((a, b) => b.date.localeCompare(a.date)));
 
     const fabAction = () => ({ plan: openAdd, shop: openShop, cost: () => openExp(null) }[tab.value]());
-    const resetAll = () => { if (confirm('清除所有已儲存資料並還原預設？')) { localStorage.removeItem(KEY); location.reload(); } };
+    const resetAll = () => { if (confirm('用程式內建的行程覆蓋目前所有行程（購物清單與花費不受影響）？你手動新增或修改的行程會被取代。')) { items.value = defaultItems(); selectedDate.value = days[0]; } };
 
     return {
       sync, connectSync, disconnectSync,
