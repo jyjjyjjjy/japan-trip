@@ -151,6 +151,56 @@ createApp({
       catch (e) { console.warn('storage full', e); }
     }, { deep: true });
 
+    /* ----- cloud sync (Firebase Firestore, optional) ----- */
+    const cfg = window.FIREBASE_CONFIG || {};
+    const syncOn = !!(cfg.apiKey && window.firebase);
+    const sync = reactive({ available: syncOn, code: localStorage.getItem('trip-code') || '', input: localStorage.getItem('trip-code') || '', status: syncOn ? '未連線' : '尚未設定 Firebase', ok: false });
+    const stores = { items, shop, exps };
+    const lastRemote = {};
+    let fdb = null, unsubs = [], timers = {};
+    const docOf = key => fdb.collection('trips').doc(sync.code).collection('data').doc(key);
+    const clone = v => JSON.parse(JSON.stringify(v));
+
+    const stopSync = () => { unsubs.forEach(u => u()); unsubs = []; sync.ok = false; };
+    const startSync = () => {
+      stopSync();
+      if (!syncOn || !sync.code) { sync.status = syncOn ? '未連線' : sync.status; return; }
+      if (!fdb) {
+        firebase.initializeApp(cfg); fdb = firebase.firestore();
+        fdb.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+      }
+      sync.status = '連線中…';
+      Object.keys(stores).forEach(key => {
+        unsubs.push(docOf(key).onSnapshot(snap => {
+          sync.ok = true; sync.status = '已同步 ✓';
+          if (snap.metadata.hasPendingWrites) return;
+          if (!snap.exists) { pushRemote(key); return; } // first device uploads its data
+          const remote = snap.data().data || [];
+          const str = JSON.stringify(remote);
+          if (str === lastRemote[key]) return;
+          lastRemote[key] = str;
+          if (str !== JSON.stringify(stores[key].value)) stores[key].value = remote;
+        }, err => { sync.ok = false; sync.status = '同步失敗：' + (err.code || err.message); }));
+      });
+    };
+    const pushRemote = key => {
+      if (!fdb || !sync.code) return;
+      const val = clone(stores[key].value), str = JSON.stringify(val);
+      if (str === lastRemote[key]) return;
+      lastRemote[key] = str;
+      docOf(key).set({ data: val, updatedAt: Date.now() }).catch(e => { sync.status = '上傳失敗：' + (e.code || e.message); });
+    };
+    Object.keys(stores).forEach(key => watch(stores[key], () => {
+      clearTimeout(timers[key]); timers[key] = setTimeout(() => pushRemote(key), 500);
+    }, { deep: true }));
+    const connectSync = () => {
+      const c = sync.input.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+      if (c.length < 4) { sync.status = '代碼至少 4 個英數字'; return; }
+      sync.code = c; sync.input = c; localStorage.setItem('trip-code', c); startSync();
+    };
+    const disconnectSync = () => { stopSync(); sync.code = ''; localStorage.removeItem('trip-code'); sync.status = '未連線'; };
+    onMounted(startSync);
+
     const wd = d => WD[new Date(d + 'T00:00:00').getDay()];
     const flightById = id => FLIGHTS.find(f => f.id === id);
     const dayItems = computed(() => items.value.filter(i => i.date === selectedDate.value));
@@ -329,10 +379,10 @@ createApp({
       reader.onload = () => {
         const img = new Image();
         img.onload = () => { // downscale so localStorage stays small
-          const s = Math.min(1, 640 / Math.max(img.width, img.height));
+          const s = Math.min(1, 400 / Math.max(img.width, img.height));
           const c = document.createElement('canvas'); c.width = img.width * s; c.height = img.height * s;
           c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-          sform.img = c.toDataURL('image/jpeg', 0.75);
+          sform.img = c.toDataURL('image/jpeg', 0.6);
         };
         img.src = reader.result;
       };
@@ -361,6 +411,7 @@ createApp({
     const resetAll = () => { if (confirm('清除所有已儲存資料並還原預設？')) { localStorage.removeItem(KEY); location.reload(); } };
 
     return {
+      sync, connectSync, disconnectSync,
       tabs, tab, days, selectedDate, wd, dayItems, flights, hotels, flightById, catEmoji, catStyle, hasHours, expEmoji,
       travel, navUrl, openNav, weather, placeOf, jpy, rate, fmt,
       modal, form, cats: CATS, confirmDel, saving, openEdit, closeModal, saveItem, deleteItem,
