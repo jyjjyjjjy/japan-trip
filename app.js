@@ -47,7 +47,7 @@ const defaultItems = () => [
   { id: uid(), date: '2026-11-23', category: '景點', name: '渡月橋', address: 'Togetsukyo Bridge, Kyoto', lat: 35.0094, lng: 135.6779, hours: '24 小時', ticket: '免費', note: '嵐山地標，傍晚的河岸與山景很美' },
   { id: uid(), date: '2026-11-23', category: '美食', name: '嵐山午餐（待定）', note: '湯豆腐 / 蕎麥麵 / 抹茶甜點' },
   { id: uid(), date: '2026-11-24', category: '住宿', name: 'Ebisu 804 入住', address: 'Ebisuhonmachi Naniwa Osaka', lat: 34.6537, lng: 135.5013, hours: 'Check-in 15:00', note: '上午退房 Daiya Ryokan，前往大阪' },
-  { id: uid(), date: '2026-11-25', category: '景點', name: '（待安排）', note: '' },
+  { id: uid(), date: '2026-11-25', category: '景點', name: '日本環球影城 USJ', address: 'Universal Studios Japan, Osaka', lat: 34.6654, lng: 135.4323, hours: '當日開園時間請查官網（11 月多為 08:30–09:00 左右，實際常提早 10–30 分鐘入園）', ticket: '依購買的票種與快速通關而定', note: '預計 06:15 左右出發，07:00–07:30 到門口排隊（頂門）。先玩最想玩的：馬力歐賽車與任天堂園區優先。出發前先下載 USJ 官方 App 並登入。快速通關購買後確認含「任天堂園區入場」。' },
   { id: uid(), date: '2026-11-26', category: '景點', name: '（待安排）', note: '' },
   { id: uid(), date: '2026-11-27', category: '美食', name: '（待安排）', note: '' },
   { id: uid(), date: '2026-11-28', category: '購物', name: '（待安排）', note: '' },
@@ -239,7 +239,11 @@ createApp({
       if (it.date === '2026-11-22') return KIX;
       return null;
     };
+    const MODE_ICON = { 步行: '🚶', 電車: '🚇', 巴士: '🚌', 開車: '🚗', 計程車: '🚕' };
     const travel = (it, idx) => {
+      if (+it.travelMin > 0) { // manual entry wins over the estimate
+        return { icon: MODE_ICON[it.travelMode] || '🚇', text: fmtMin(Math.round(+it.travelMin)), from: it.travelNote || '', manual: true };
+      }
       if (it.lat == null) return null;
       const o = originOf(it, idx);
       if (!o) return null;
@@ -252,6 +256,14 @@ createApp({
     const navUrl = ({ q, lat, lng }) => {
       const dest = lat != null ? `${lat},${lng}` : q;
       return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=transit`;
+    };
+    // Google Maps route from the previous stop (or last night's hotel) to this item
+    const routeUrl = (it, idx) => {
+      const o = originOf(it, idx);
+      const dest = it.lat != null ? `${it.lat},${it.lng}` : (it.address || it.name) + ' Japan';
+      let url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=transit`;
+      if (o) url += `&origin=${encodeURIComponent(o.lat + ',' + o.lng)}`;
+      return url;
     };
     const openNav = it => {
       let url;
@@ -318,7 +330,7 @@ createApp({
     const modal = ref(null);
     const confirmDel = ref(false);
     const saving = ref(false);
-    const blank = () => ({ id: null, date: selectedDate.value, category: '景點', name: '', address: '', hours: '', ticket: '', note: '', lat: null, lng: null });
+    const blank = () => ({ id: null, date: selectedDate.value, category: '景點', name: '', address: '', hours: '', ticket: '', note: '', lat: null, lng: null, travelMode: '', travelMin: null, travelNote: '' });
     const form = reactive(blank());
     const openAdd = () => { Object.assign(form, blank()); confirmDel.value = false; modal.value = 'plan'; };
     const openEdit = it => { Object.assign(form, blank(), JSON.parse(JSON.stringify(it))); confirmDel.value = false; modal.value = 'plan'; };
@@ -422,7 +434,7 @@ createApp({
     return {
       sync, connectSync, disconnectSync,
       tabs, tab, days, selectedDate, wd, dayItems, flights, hotels, flightById, catEmoji, catStyle, hasHours, expEmoji,
-      travel, navUrl, openNav, weather, placeOf, jpy, rate, fmt,
+      travel, routeUrl, modes: Object.keys(MODE_ICON), navUrl, openNav, weather, placeOf, jpy, rate, fmt,
       modal, form, cats: CATS, confirmDel, saving, openEdit, closeModal, saveItem, deleteItem,
       listEl, dateStrip, shop, sform, onPhoto, saveShop, removeShop,
       exps, eform, expCats: EXP_CATS, openExp, saveExp, deleteExp, totalExp, sortedExp, fabAction, resetAll,
