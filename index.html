@@ -285,22 +285,85 @@
     </section>
 
     <!-- ===== Shopping ===== -->
-    <section v-show="tab==='shop'">
-      <h2 class="sec-title">購物清單 <span class="text-[11px] font-normal text-ink/40">{{ shop.filter(s=>s.done).length }}/{{ shop.length }}</span></h2>
+﻿    <section v-show="tab==='shop'" class="space-y-5">
+      <!-- header -->
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="font-maru text-2xl font-bold">購物清單</h2>
+          <p class="mt-1 text-sm text-ink/45">記錄想買的東西</p>
+        </div>
+        <button @click="openShop()" class="flex items-center gap-1.5 rounded-full bg-sakura-deep px-5 py-3 text-sm font-bold text-white shadow-[0_4px_0_#C96F85] transition active:translate-y-0.5 active:shadow-none">
+          <ic name="plus" class="h-4 w-4"></ic>新增
+        </button>
+      </div>
+
+      <!-- stat cards with stickers -->
       <div class="grid grid-cols-2 gap-3">
-        <div v-for="s in shop" :key="s.id" class="overflow-hidden rounded-2xl bg-white shadow-sm" :class="s.done && 'opacity-50'">
-          <div class="relative aspect-square bg-sakura-soft">
-            <img v-if="s.img" :src="s.img" class="h-full w-full object-cover">
-            <div v-else class="grid h-full place-items-center text-4xl">🛍️</div>
-            <button @click="removeShop(s)" class="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-white/85 text-ink/50"><ic name="close" class="h-4 w-4"></ic></button>
-          </div>
-          <label class="flex items-center gap-2 p-3">
-            <input type="checkbox" v-model="s.done" class="h-4 w-4 accent-sky-deep">
-            <span class="text-sm font-medium" :class="s.done && 'line-through'">{{ s.name }}</span>
-          </label>
+        <div class="relative min-h-[104px] overflow-hidden rounded-3xl border border-ink/10 bg-white/70 p-4 shadow-[0_3px_0_rgba(157,193,138,.35)]">
+          <div class="font-maru text-4xl font-bold">{{ todoCount }}</div>
+          <div class="mt-0.5 text-sm text-ink/45">待購買</div>
+          <img src="sticker-cart.png" alt="" class="pointer-events-none absolute bottom-1.5 right-1.5 h-[84px] w-auto select-none drop-shadow-sm">
+        </div>
+        <div class="relative min-h-[104px] overflow-hidden rounded-3xl border border-ink/10 bg-white/70 p-4 shadow-[0_3px_0_rgba(157,193,138,.35)]">
+          <div class="font-maru text-4xl font-bold">{{ boughtCount }}</div>
+          <div class="mt-0.5 text-sm text-ink/45">已購買</div>
+          <img src="sticker-done.png" alt="" class="pointer-events-none absolute bottom-1.5 right-1.5 h-[84px] w-auto select-none drop-shadow-sm">
         </div>
       </div>
-      <p v-if="!shop.length" class="py-12 text-center text-sm text-ink/40">想買的東西都記在這裡<br>點右下角 ＋ 新增</p>
+
+      <!-- filter -->
+      <div class="flex items-center justify-between gap-3">
+        <h3 class="font-maru text-lg font-bold">待購買</h3>
+        <div class="flex items-center gap-2">
+          <button @click="onlyImportant=!onlyImportant" class="rounded-full border px-3.5 py-2 text-xs font-medium transition"
+            :class="onlyImportant ? 'border-sakura-deep bg-sakura-soft text-sakura-deep' : 'border-ink/10 bg-white text-ink/50'">只看重要</button>
+          <div class="relative">
+            <select v-model="shopFilter" class="appearance-none rounded-full border border-ink/10 bg-white py-2 pl-4 pr-9 text-sm font-medium outline-none focus:border-sky">
+              <option value="全部">全部 ({{ catCount('全部') }})</option>
+              <option v-for="c in shopCats" :key="c" :value="c">{{ shopEmoji(c) }} {{ c }} ({{ catCount(c) }})</option>
+            </select>
+            <span class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-ink/40">▼</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- to buy -->
+      <div class="space-y-3">
+        <div v-for="s in shopTodo" :key="s.id" class="flex items-center gap-3 rounded-3xl border border-ink/10 bg-white p-3 shadow-sm">
+          <input type="checkbox" v-model="s.done" class="h-6 w-6 shrink-0 accent-sky-deep" aria-label="已購買">
+          <div class="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-2xl bg-sakura-soft">
+            <img v-if="s.img" :src="s.img" class="h-full w-full object-cover" alt="">
+            <div v-else class="grid h-full w-full place-items-center text-3xl">{{ shopEmoji(shopCat(s)) }}</div>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="font-bold leading-snug">{{ s.name }}</div>
+            <div class="mt-1 flex flex-wrap gap-1.5">
+              <span class="rounded-full border border-ink/15 px-2.5 py-0.5 text-[11px] font-medium">{{ shopEmoji(shopCat(s)) }} {{ shopCat(s) }}</span>
+              <span class="rounded-full border px-2.5 py-0.5 text-[11px] font-medium" :class="s.priority==='重要' ? 'border-sakura bg-sakura-soft text-sakura-deep' : 'border-ink/10 bg-cream text-ink/50'">{{ s.priority || '一般' }}</span>
+            </div>
+            <p v-if="s.note" class="mt-1 truncate text-sm text-ink/50">{{ s.note }}</p>
+          </div>
+          <button @click="openShop(s)" class="shrink-0 px-1 py-2 text-ink/40" aria-label="編輯"><ic name="dots" class="h-5 w-5"></ic></button>
+        </div>
+        <p v-if="!shopTodo.length" class="py-8 text-center text-sm text-ink/40">{{ todoCount ? '這個分類沒有待購買的項目' : '想買的東西都記在這裡' }}<br v-if="!todoCount">{{ todoCount ? '' : '點右上角「新增」' }}</p>
+      </div>
+
+      <!-- bought -->
+      <div v-if="shopBought.length" class="space-y-3">
+        <h3 class="font-maru text-lg font-bold">已購買 <span class="text-sm font-normal text-ink/40">{{ shopBought.length }}</span></h3>
+        <div v-for="s in shopBought" :key="s.id" class="flex items-center gap-3 rounded-3xl border border-ink/10 bg-white/70 p-3 opacity-70">
+          <input type="checkbox" v-model="s.done" class="h-6 w-6 shrink-0 accent-sky-deep" aria-label="已購買">
+          <div class="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-sakura-soft">
+            <img v-if="s.img" :src="s.img" class="h-full w-full object-cover" alt="">
+            <div v-else class="grid h-full w-full place-items-center text-2xl">{{ shopEmoji(shopCat(s)) }}</div>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="font-medium leading-snug line-through">{{ s.name }}</div>
+            <div class="mt-0.5 text-[11px] text-ink/45">{{ shopEmoji(shopCat(s)) }} {{ shopCat(s) }}</div>
+          </div>
+          <button @click="openShop(s)" class="shrink-0 px-1 py-2 text-ink/40" aria-label="編輯"><ic name="dots" class="h-5 w-5"></ic></button>
+        </div>
+      </div>
     </section>
 
     <!-- ===== Expenses ===== -->
@@ -366,7 +429,7 @@
   </main>
 
   <!-- FAB -->
-  <div v-if="tab!=='info' && tab!=='home'" class="pointer-events-none fixed inset-x-0 bottom-0 z-30">
+  <div v-if="tab!=='info' && tab!=='home' && tab!=='shop'" class="pointer-events-none fixed inset-x-0 bottom-0 z-30">
     <div class="relative mx-auto max-w-md">
       <button @click="fabAction" aria-label="新增"
         style="bottom: calc(84px + env(safe-area-inset-bottom))"
@@ -438,22 +501,41 @@
     </div>
   </transition>
 
-  <!-- ============ Modal: shopping ============ -->
+﻿  <!-- ============ Modal: shopping ============ -->
   <transition name="sheet">
     <div v-if="modal==='shop'" class="fixed inset-0 z-40 flex items-end justify-center bg-ink/40" @click.self="closeModal">
-      <div class="w-full max-w-md rounded-t-[28px] bg-white p-5 pb-8">
-        <div class="mb-4 flex items-center justify-between"><h3 class="font-maru text-lg font-bold">新增想買的東西</h3>
+      <div class="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-[28px] bg-white p-5 pb-8">
+        <div class="mb-4 flex items-center justify-between"><h3 class="font-maru text-lg font-bold">{{ sform.id ? '編輯商品' : '新增想買的東西' }}</h3>
           <button @click="closeModal" class="text-ink/40"><ic name="close" class="h-5 w-5"></ic></button></div>
         <div class="space-y-3.5">
-          <div><label class="lbl">商品名稱</label><input v-model="sform.name" class="inp"></div>
+          <div><label class="lbl">商品名稱</label><input v-model="sform.name" class="inp" placeholder="例：保暖襪"></div>
+          <div><label class="lbl">分類</label>
+            <div class="flex flex-wrap gap-2">
+              <button v-for="c in shopCats" :key="c" @click="sform.category=c" class="rounded-full px-3 py-1.5 text-sm"
+                :class="sform.category===c ? 'bg-sky-deep text-white' : 'bg-cream'">{{ shopEmoji(c) }} {{ c }}</button>
+            </div></div>
+          <div><label class="lbl">重要程度</label>
+            <div class="flex gap-2"><button v-for="p in ['一般','重要']" :key="p" @click="sform.priority=p" class="flex-1 rounded-xl py-2.5 text-sm"
+              :class="sform.priority===p ? (p==='重要' ? 'bg-sakura-deep text-white' : 'bg-sky-deep text-white') : 'bg-cream'">{{ p }}</button></div></div>
+          <div><label class="lbl">備註（選填）</label><input v-model="sform.note" class="inp" placeholder="例：Donki 或藥妝店"></div>
           <div><label class="lbl">圖片</label>
             <label class="grid h-36 cursor-pointer place-items-center overflow-hidden rounded-2xl border-2 border-dashed border-sky/60 bg-sky-soft/50 text-sm text-ink/50">
-              <img v-if="sform.img" :src="sform.img" class="h-full w-full object-cover">
+              <img v-if="sform.img" :src="sform.img" class="h-full w-full object-cover" alt="">
               <span v-else>📷 拍照或選擇照片</span>
               <input type="file" accept="image/*" class="hidden" @change="onPhoto">
             </label></div>
         </div>
-        <button @click="saveShop" :disabled="!sform.name.trim()" class="btn mt-6 w-full bg-sky-deep disabled:opacity-40">加入清單</button>
+        <div class="mt-6 flex gap-3">
+          <template v-if="sform.id && confirmDel">
+            <p class="flex-1 self-center text-sm text-sakura-deep">確定要刪除這個商品嗎？</p>
+            <button @click="confirmDel=false" class="btn-ghost">取消</button>
+            <button @click="deleteShop" class="btn bg-sakura-deep">確認刪除</button>
+          </template>
+          <template v-else>
+            <button v-if="sform.id" @click="confirmDel=true" class="btn-ghost text-sakura-deep">刪除</button>
+            <button @click="saveShop" :disabled="!sform.name.trim()" class="btn flex-1 bg-sky-deep disabled:opacity-40">{{ sform.id ? '儲存' : '加入清單' }}</button>
+          </template>
+        </div>
       </div>
     </div>
   </transition>

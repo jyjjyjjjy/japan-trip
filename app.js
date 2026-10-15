@@ -129,6 +129,7 @@ const ICONS = {
   nav: '<path d="M3 11l18-8-8 18-2-8z"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   ticket: '<path d="M3 9a2 2 0 002-2h14a2 2 0 002 2v0a2 2 0 000 6v0a2 2 0 00-2 2H5a2 2 0 00-2-2v0a2 2 0 000-6z"/>',
+  dots: '<circle cx="12" cy="5" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="19" r="1.7" fill="currentColor"/>',
   grip: '<circle cx="9" cy="6" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="18" r="1.2"/>',
   plane: '<path d="M2 14l8-2-3-8 2-1 6 8 5-1.5a1.6 1.6 0 01.6 3L15 15l-1 6-2 .5-1-6.5-8-1z" stroke-linejoin="round"/>',
 };
@@ -436,8 +437,19 @@ createApp({
     };
 
     /* ----- shopping ----- */
-    const sform = reactive({ name: '', img: '' });
-    const openShop = () => { sform.name = ''; sform.img = ''; modal.value = 'shop'; };
+    const blankShop = () => ({ id: null, name: '', img: '', category: '零食', priority: '一般', note: '' });
+    const sform = reactive(blankShop());
+    const openShop = s => { Object.assign(sform, s && s.id ? { ...blankShop(), ...s } : blankShop()); confirmDel.value = false; modal.value = 'shop'; };
+    const shopCat = s => s.category || '其它';
+    const shopEmoji = c => ({ 零食: '🍫', 護膚品: '🧴', 護髮品: '💆', 衣服: '👕', 鞋子: '👟', 其它: '📦' }[c] || '📦');
+    const shopFilter = ref('全部');
+    const onlyImportant = ref(false);
+    const shopMatch = s => (shopFilter.value === '全部' || shopCat(s) === shopFilter.value) && (!onlyImportant.value || s.priority === '重要');
+    const shopTodo = computed(() => shop.value.filter(s => !s.done && shopMatch(s)));
+    const shopBought = computed(() => shop.value.filter(s => s.done && shopMatch(s)));
+    const todoCount = computed(() => shop.value.filter(s => !s.done).length);
+    const boughtCount = computed(() => shop.value.filter(s => s.done).length);
+    const catCount = c => shop.value.filter(s => !s.done && (c === '全部' || shopCat(s) === c)).length;
     const onPhoto = e => {
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
@@ -453,8 +465,13 @@ createApp({
       };
       reader.readAsDataURL(file);
     };
-    const saveShop = () => { shop.value.unshift({ id: uid(), name: sform.name.trim(), img: sform.img, done: false }); closeModal(); };
-    const removeShop = s => { if (confirm(`刪除「${s.name}」？`)) shop.value = shop.value.filter(x => x.id !== s.id); };
+    const saveShop = () => {
+      const d = { ...sform, name: sform.name.trim() };
+      if (d.id) Object.assign(shop.value.find(x => x.id === d.id), d);
+      else { d.id = uid(); d.done = false; shop.value.unshift(d); }
+      closeModal();
+    };
+    const deleteShop = () => { shop.value = shop.value.filter(x => x.id !== sform.id); closeModal(); };
 
     /* ----- expenses ----- */
     const eform = reactive({ id: null, category: '飲食', name: '', date: todayStr(), amount: null, pay: '現金', note: '' });
@@ -535,7 +552,8 @@ createApp({
       tabs, tab, days, selectedDate, wd, dayItems, flights, hotels, flightById, catEmoji, catStyle, hasHours, expEmoji,
       travel, routeUrl, modes: Object.keys(MODE_ICON), navUrl, openNav, weather, placeOf, jpy, rate, fmt,
       modal, form, cats: CATS, confirmDel, saving, openEdit, closeModal, saveItem, deleteItem,
-      listEl, dateStrip, shop, sform, onPhoto, saveShop, removeShop,
+      listEl, dateStrip, shop, sform, onPhoto, saveShop, deleteShop, openShop, shopCats: ['零食', '護膚品', '護髮品', '衣服', '鞋子', '其它'],
+      shopEmoji, shopCat, shopFilter, onlyImportant, shopTodo, shopBought, todoCount, boughtCount, catCount,
       exps, eform, expCats: EXP_CATS, openExp, saveExp, deleteExp, totalExp, sortedExp, fabAction, resetAll,
     };
   },
