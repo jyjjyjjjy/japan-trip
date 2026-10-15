@@ -209,14 +209,15 @@ createApp({
     }, { deep: true });
 
     /* ----- settings: theme colour, font size, dark mode, falling effect (per device, not synced) ----- */
-    const SETTINGS_KEY = 'trip-settings-v1';
+    const SETTINGS_KEY = 'trip-settings-v2';
+    const DEFAULT_THEME = '#A2D2FF';
     let savedS = {};
     try { savedS = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch {}
-    const settings = reactive({ theme: savedS.theme || '#4A9CC7', font: savedS.font || 16, dark: !!savedS.dark, fx: savedS.fx !== undefined ? savedS.fx : 'maple' });
+    const settings = reactive({ theme: savedS.theme || DEFAULT_THEME, font: savedS.font || 16, dark: !!savedS.dark, fx: savedS.fx !== undefined ? savedS.fx : 'maple' });
     const customColor = ref(settings.theme);
     const themeColors = [
-      { name: '天空藍', hex: '#4A9CC7' }, { name: '櫻花粉', hex: '#E58CA0' }, { name: '抹茶綠', hex: '#6E9B5B' },
-      { name: '楓葉橘', hex: '#D9763A' }, { name: '薰衣草紫', hex: '#8E7CC3' }, { name: '琥珀黃', hex: '#D9A441' },
+      { name: '天空藍', hex: '#A2D2FF' }, { name: '冰藍', hex: '#BDE0FE' }, { name: '薰衣草', hex: '#CDB4DB' },
+      { name: '花瓣粉', hex: '#FFC8DD' }, { name: '嬰兒粉', hex: '#FFAFCC' },
     ];
     const fxOptions = [
       { id: 'none', icon: '✖️', label: '無' }, { id: 'maple', icon: '🍁', label: '楓葉' },
@@ -224,16 +225,35 @@ createApp({
     ];
     const hexRgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
     const mixRgb = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+    // the chosen colour is the soft accent ("sky"); the strong colour used for buttons / active text is derived from it
+    // (same hue, mid lightness) so white text on it stays readable even with pastel picks
+    const rgbHsl = ([r, g, b]) => {
+      r /= 255; g /= 255; b /= 255;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+      let h = 0, s = 0;
+      if (d) {
+        s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn);
+        h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+        h /= 6;
+      }
+      return [h, s, l];
+    };
+    const hslRgb = ([h, s, l]) => {
+      const f = (p, q, t) => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < .5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+      const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+      return [f(p, q, h + 1 / 3), f(p, q, h), f(p, q, h - 1 / 3)].map(v => Math.round(v * 255));
+    };
     const applyTheme = () => {
-      const root = document.documentElement, p = hexRgb(/^#[0-9a-f]{6}$/i.test(settings.theme) ? settings.theme : '#4A9CC7');
+      const root = document.documentElement, p = hexRgb(/^#[0-9a-f]{6}$/i.test(settings.theme) ? settings.theme : DEFAULT_THEME);
       root.dataset.theme = settings.dark ? 'dark' : 'light';
       root.style.fontSize = settings.font + 'px';
       const set = (k, rgb) => root.style.setProperty(k, rgb.join(' '));
-      set('--sky-deep', settings.dark ? mixRgb(p, [255, 255, 255], .2) : p);
-      set('--sky', mixRgb(p, [255, 255, 255], settings.dark ? .1 : .42));
-      set('--sky-soft', settings.dark ? mixRgb(p, [28, 31, 36], .78) : mixRgb(p, [255, 255, 255], .88));
+      const [h, s] = rgbHsl(p);
+      set('--sky', p);
+      set('--sky-deep', hslRgb([h, Math.min(.6, Math.max(.4, s * .85)), settings.dark ? .6 : .5]));
+      set('--sky-soft', settings.dark ? mixRgb(p, [28, 31, 36], .8) : mixRgb(p, [255, 255, 255], .62));
       const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', settings.dark ? '#1C1F24' : '#' + mixRgb(p, [255, 255, 255], .42).map(v => v.toString(16).padStart(2, '0')).join(''));
+      if (meta) meta.setAttribute('content', settings.dark ? '#1C1F24' : '#' + p.map(v => v.toString(16).padStart(2, '0')).join(''));
     };
     const setTheme = hex => { settings.theme = hex; customColor.value = hex; };
     watch(settings, () => {

@@ -1,7 +1,7 @@
 /* ---------- theme variables (rgb triplets so Tailwind opacity modifiers keep working) ---------- */
 :root {
   --cream: 251 244 230; --ink: 75 74 71; --surface: 255 255 255;
-  --sky: 143 205 235; --sky-deep: 74 156 199; --sky-soft: 227 243 251;
+  --sky: 162 210 255; --sky-deep: 51 132 204; --sky-soft: 220 238 255;
   --sakura-soft: 253 235 238; --moss-soft: 234 243 228;
 }
 :root[data-theme="dark"] {
