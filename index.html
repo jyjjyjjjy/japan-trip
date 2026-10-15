@@ -17,10 +17,11 @@
   tailwind.config = {
     theme: { extend: {
       colors: {
-        cream: '#FBF4E6', sky: { DEFAULT: '#8FCDEB', soft: '#E3F3FB', deep: '#4A9CC7' },
-        sakura: { DEFAULT: '#F4B9C4', soft: '#FDEBEE', deep: '#E58CA0' },
-        moss: { DEFAULT: '#9DC18A', soft: '#EAF3E4', deep: '#6E9B5B' },
-        ink: '#4B4A47'
+        cream: 'rgb(var(--cream) / <alpha-value>)',
+        sky: { DEFAULT: 'rgb(var(--sky) / <alpha-value>)', soft: 'rgb(var(--sky-soft) / <alpha-value>)', deep: 'rgb(var(--sky-deep) / <alpha-value>)' },
+        sakura: { DEFAULT: '#F4B9C4', soft: 'rgb(var(--sakura-soft) / <alpha-value>)', deep: '#E58CA0' },
+        moss: { DEFAULT: '#9DC18A', soft: 'rgb(var(--moss-soft) / <alpha-value>)', deep: '#6E9B5B' },
+        ink: 'rgb(var(--ink) / <alpha-value>)'
       },
       fontFamily: { sans: ['"Noto Sans TC"', 'system-ui', 'sans-serif'], maru: ['"Zen Maru Gothic"', '"Noto Sans TC"', 'sans-serif'] }
     } }
@@ -73,7 +74,7 @@
           <div class="mb-1 flex justify-between text-[11px] opacity-90"><span>{{ progress.label }}</span><span>{{ progress.pct }}%</span></div>
           <div class="h-2 overflow-hidden rounded-full bg-white/30"><div class="h-full rounded-full bg-white transition-all duration-700" :style="{width: progress.pct+'%'}"></div></div>
         </div>
-        <button @click="goTo('plan')" class="relative mt-4 w-full rounded-xl bg-white/90 py-2.5 text-sm font-medium text-sky-deep">查看每日行程 →</button>
+        <button @click="goTo('plan')" style="background:rgba(255,255,255,.92)" class="relative mt-4 w-full rounded-xl py-2.5 text-sm font-medium text-sky-deep">查看每日行程 →</button>
       </div>
 
       <!-- today (during the trip) -->
@@ -366,6 +367,71 @@
       </div>
     </section>
 
+    <!-- ===== Settings ===== -->
+    <section v-show="tab==='settings'" class="space-y-4">
+      <div>
+        <h2 class="font-maru text-2xl font-bold">設置</h2>
+        <p class="mt-1 text-sm text-ink/45">個人化你的旅程 App（只存在這支手機）</p>
+      </div>
+
+      <!-- theme colour -->
+      <div class="rounded-3xl border border-ink/10 bg-white p-4 shadow-sm">
+        <div class="flex items-center gap-3">
+          <span class="grid h-11 w-11 place-items-center rounded-full bg-cream text-sky-deep"><ic name="palette" class="h-5 w-5"></ic></span>
+          <div><div class="font-bold">主題顏色</div><div class="text-xs text-ink/45">選擇你喜歡的顏色</div></div>
+        </div>
+        <div class="mt-4 flex justify-between">
+          <button v-for="c in themeColors" :key="c.hex" @click="setTheme(c.hex)" :aria-label="c.name"
+            class="h-12 w-12 rounded-2xl transition" :style="{background:c.hex}"
+            :class="settings.theme.toLowerCase()===c.hex.toLowerCase() ? 'scale-105 ring-4 ring-ink/70 ring-offset-2 ring-offset-cream' : ''"></button>
+        </div>
+        <div class="mt-4 border-t border-ink/10 pt-3">
+          <div class="mb-2 text-xs font-medium text-ink/60">自訂顏色</div>
+          <div class="flex gap-3">
+            <input type="color" v-model="customColor" class="h-12 min-w-0 flex-1 cursor-pointer rounded-2xl border border-ink/10 bg-transparent p-1">
+            <button @click="setTheme(customColor)" class="btn bg-sky-deep px-6">套用</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- font size -->
+      <div class="rounded-3xl border border-ink/10 bg-white p-4 shadow-sm">
+        <div class="flex items-center gap-3">
+          <span class="grid h-11 w-11 place-items-center rounded-full bg-cream text-sky-deep"><ic name="type" class="h-5 w-5"></ic></span>
+          <div class="flex-1"><div class="font-bold">字體大小</div><div class="text-xs text-ink/45">調整文字顯示大小</div></div>
+          <span class="font-maru font-bold text-sky-deep">{{ settings.font }}px</span>
+        </div>
+        <input type="range" min="13" max="20" step="1" v-model.number="settings.font" class="mt-4 w-full accent-sky-deep" aria-label="字體大小">
+        <div class="flex justify-between text-xs text-ink/45"><span>小</span><span>大</span></div>
+      </div>
+
+      <!-- dark mode -->
+      <div class="flex items-center gap-3 rounded-3xl border border-ink/10 bg-white p-4 shadow-sm">
+        <span class="grid h-11 w-11 place-items-center rounded-full bg-cream text-sky-deep"><ic name="moon" class="h-5 w-5"></ic></span>
+        <div class="flex-1"><div class="font-bold">深色模式</div><div class="text-xs text-ink/45">減少螢幕亮度</div></div>
+        <button @click="settings.dark=!settings.dark" role="switch" :aria-checked="settings.dark" aria-label="深色模式"
+          class="relative h-8 w-14 shrink-0 rounded-full transition-colors" :class="settings.dark ? 'bg-sky-deep' : 'bg-ink/15'">
+          <span class="absolute left-1 top-1 h-6 w-6 rounded-full bg-[#fff] shadow transition-transform" :class="settings.dark && 'translate-x-6'"></span>
+        </button>
+      </div>
+
+      <!-- falling effect -->
+      <div class="rounded-3xl border border-ink/10 bg-white p-4 shadow-sm">
+        <div class="flex items-center gap-3">
+          <span class="grid h-11 w-11 place-items-center rounded-full bg-cream text-sky-deep"><ic name="sparkle" class="h-5 w-5"></ic></span>
+          <div><div class="font-bold">飄落特效</div><div class="text-xs text-ink/45">選擇背景動畫效果</div></div>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          <button v-for="o in fxOptions" :key="o.id" @click="settings.fx=o.id"
+            class="flex flex-col items-center gap-1.5 rounded-2xl border-2 py-4 transition"
+            :class="settings.fx===o.id ? 'border-sakura-deep bg-sakura-soft' : 'border-ink/10 bg-cream'">
+            <span class="text-3xl leading-none">{{ o.icon }}</span>
+            <span class="text-sm font-medium">{{ o.label }}</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== Expenses ===== -->
     <section v-show="tab==='cost'">
       <div class="mb-4 rounded-3xl bg-gradient-to-br p-5 text-white shadow-md transition-colors" :class="overBudget ? 'from-red-400 to-red-500' : 'from-sky to-sky-deep'">
@@ -429,7 +495,7 @@
   </main>
 
   <!-- FAB -->
-  <div v-if="tab!=='info' && tab!=='home' && tab!=='shop'" class="pointer-events-none fixed inset-x-0 bottom-0 z-30">
+  <div v-if="tab!=='info' && tab!=='home' && tab!=='shop' && tab!=='settings'" class="pointer-events-none fixed inset-x-0 bottom-0 z-30">
     <div class="relative mx-auto max-w-md">
       <button @click="fabAction" aria-label="新增"
         style="bottom: calc(84px + env(safe-area-inset-bottom))"
@@ -439,11 +505,14 @@
     </div>
   </div>
 
+  <!-- falling-leaves effect (decorative, never blocks taps) -->
+  <canvas ref="fxCanvas" class="pointer-events-none fixed left-0 top-0 z-20 h-full w-full" aria-hidden="true"></canvas>
+
   <!-- ============ Bottom navigation (sticky) ============ -->
   <nav class="fixed inset-x-0 bottom-0 z-30" aria-label="主要導覽">
     <div class="mx-auto max-w-md rounded-t-[26px] border-t border-white/60 bg-white/85 px-2 pt-2 shadow-[0_-6px_24px_rgba(120,160,190,.25)] backdrop-blur-md"
          style="padding-bottom: calc(8px + env(safe-area-inset-bottom))">
-      <div class="grid grid-cols-5">
+      <div class="grid grid-cols-6">
         <button v-for="t in tabs" :key="t.id" @click="goTo(t.id)" :aria-label="t.label" :aria-current="tab===t.id ? 'page' : null"
           class="flex flex-col items-center gap-0.5 py-1 transition-colors" :class="tab===t.id ? 'text-sky-deep' : 'text-ink/45'">
           <span class="grid h-8 w-14 place-items-center rounded-full transition-all duration-300" :class="tab===t.id ? 'bg-sky-soft' : ''">

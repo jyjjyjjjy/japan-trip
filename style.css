@@ -1,3 +1,15 @@
+/* ---------- theme variables (rgb triplets so Tailwind opacity modifiers keep working) ---------- */
+:root {
+  --cream: 251 244 230; --ink: 75 74 71; --surface: 255 255 255;
+  --sky: 143 205 235; --sky-deep: 74 156 199; --sky-soft: 227 243 251;
+  --sakura-soft: 253 235 238; --moss-soft: 234 243 228;
+}
+:root[data-theme="dark"] {
+  --cream: 28 31 36; --ink: 232 230 225; --surface: 41 46 54;
+  --sakura-soft: 74 45 54; --moss-soft: 40 56 42;
+  color-scheme: dark;
+}
+
 [v-cloak] { display: none; }
 html { -webkit-tap-highlight-color: transparent; }
 body { overscroll-behavior-y: none; }
@@ -5,20 +17,20 @@ body { overscroll-behavior-y: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
 .sec-title { font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: .75rem; }
-.lbl { display: block; font-size: .75rem; color: rgba(75,74,71,.55); margin-bottom: .25rem; }
-.inp { width: 100%; border-radius: .75rem; background: #FBF4E6; padding: .65rem .85rem; font-size: .95rem; outline: none; border: 1.5px solid transparent; transition: border-color .2s; }
-.inp:focus { border-color: #8FCDEB; }
+.lbl { display: block; font-size: .75rem; color: rgb(var(--ink) / .55); margin-bottom: .25rem; }
+.inp { width: 100%; border-radius: .75rem; background: rgb(var(--cream)); padding: .65rem .85rem; font-size: .95rem; outline: none; border: 1.5px solid transparent; transition: border-color .2s; }
+.inp:focus { border-color: rgb(var(--sky)); }
 /* iOS Safari: date inputs ignore width and overflow their grid cell */
 .inp, input[type="date"].inp { min-width: 0; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none; }
 input[type="date"].inp, input[type="time"].inp { display: block; min-height: 2.75rem; line-height: 1.4; text-align: left; }
 input[type="date"].inp::-webkit-date-and-time-value, input[type="time"].inp::-webkit-date-and-time-value { text-align: left; margin: 0; min-height: 1.4em; }
 .btn { border-radius: .9rem; padding: .8rem 1.25rem; color: #fff; font-weight: 700; transition: transform .15s; }
 .btn:active { transform: scale(.97); }
-.btn-ghost { border-radius: .9rem; padding: .8rem 1.1rem; background: #FBF4E6; font-weight: 500; }
+.btn-ghost { border-radius: .9rem; padding: .8rem 1.1rem; background: rgb(var(--cream)); font-weight: 500; }
 
 /* sortable states */
 .sortable-ghost { opacity: .35; }
-.sortable-chosen { filter: drop-shadow(0 8px 14px rgba(74,156,199,.35)); }
+.sortable-chosen { filter: drop-shadow(0 8px 14px rgb(var(--sky-deep) / .35)); }
 
 /* bottom-sheet transition */
 .sheet-enter-active, .sheet-leave-active { transition: background-color .25s; }
@@ -28,7 +40,27 @@ input[type="date"].inp::-webkit-date-and-time-value, input[type="time"].inp::-we
 
 /* boarding-pass notches */
 .pass-notch::before, .pass-notch::after {
-  content: ''; position: absolute; left: 62%; width: 16px; height: 16px; border-radius: 9999px; background: #FBF4E6;
+  content: ''; position: absolute; left: 62%; width: 16px; height: 16px; border-radius: 9999px; background: rgb(var(--cream));
 }
 .pass-notch::before { top: -8px; }
 .pass-notch::after { bottom: -8px; }
+
+/* ---------- font-size setting: make the px-based text sizes follow the root font size ---------- */
+.text-\[10px\] { font-size: .625rem !important; }
+.text-\[11px\] { font-size: .6875rem !important; }
+.text-\[12px\] { font-size: .75rem !important; }
+.text-\[12\.5px\] { font-size: .78125rem !important; }
+.text-\[13px\] { font-size: .8125rem !important; }
+.text-\[16px\] { font-size: 1rem !important; }
+.text-\[17px\] { font-size: 1.0625rem !important; }
+
+/* ---------- dark mode: surfaces that use fixed light classes ---------- */
+:root[data-theme="dark"] .bg-white { background-color: rgb(var(--surface)) !important; }
+:root[data-theme="dark"] .bg-white\/70 { background-color: rgb(var(--surface) / .72) !important; }
+:root[data-theme="dark"] .bg-white\/85 { background-color: rgb(var(--surface) / .88) !important; }
+:root[data-theme="dark"] .bg-white\/90 { background-color: rgb(var(--surface) / .92) !important; }
+:root[data-theme="dark"] .border-white\/60 { border-color: rgb(255 255 255 / .08) !important; }
+:root[data-theme="dark"] .bg-orange-50 { background-color: rgb(251 146 60 / .16) !important; }
+:root[data-theme="dark"] .bg-stone-100 { background-color: rgb(255 255 255 / .08) !important; }
+:root[data-theme="dark"] .bg-red-50 { background-color: rgb(239 68 68 / .16) !important; }
+:root[data-theme="dark"] .shadow-sm, :root[data-theme="dark"] .shadow-md, :root[data-theme="dark"] .shadow-lg { box-shadow: 0 1px 3px rgb(0 0 0 / .4) !important; }

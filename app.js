@@ -119,6 +119,11 @@ const WCODE = code => {
 
 const ICONS = {
   home: '<path d="M3 11l9-8 9 8M5 9.5V20h5v-6h4v6h5V9.5"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>',
+  palette: '<circle cx="13.5" cy="6.5" r=".8" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".8" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".8" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".8" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.7-.8 1.7-1.7 0-.4-.2-.8-.5-1.1-.3-.3-.4-.7-.4-1.1 0-.9.8-1.7 1.7-1.7H16c3.3 0 6-2.7 6-6 0-4.9-4.5-8.4-10-8.4z"/>',
+  type: '<path d="M4 7V4h16v3M9 20h6M12 4v16"/>',
+  moon: '<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>',
+  sparkle: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
   pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/>',
   info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
   basket: '<path d="M4 10h16l-1.6 9a2 2 0 01-2 1.7H7.6a2 2 0 01-2-1.7zM8 10l3-6M16 10l-3-6M9.5 14v3M12 14v3M14.5 14v3"/>',
@@ -184,6 +189,7 @@ createApp({
       { id: 'info', icon: 'info', label: '資訊' },
       { id: 'shop', icon: 'basket', label: '購物' },
       { id: 'cost', icon: 'yen', label: '花費' },
+      { id: 'settings', icon: 'gear', label: '設置' },
     ];
     const tab = ref('home');
     const days = TRIP_DAYS;
@@ -201,6 +207,82 @@ createApp({
       try { localStorage.setItem(KEY, JSON.stringify({ items: items.value, shop: shop.value, exps: exps.value, budget: budget.value, checklist: checklist.value })); }
       catch (e) { console.warn('storage full', e); }
     }, { deep: true });
+
+    /* ----- settings: theme colour, font size, dark mode, falling effect (per device, not synced) ----- */
+    const SETTINGS_KEY = 'trip-settings-v1';
+    let savedS = {};
+    try { savedS = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch {}
+    const settings = reactive({ theme: savedS.theme || '#4A9CC7', font: savedS.font || 16, dark: !!savedS.dark, fx: savedS.fx !== undefined ? savedS.fx : 'maple' });
+    const customColor = ref(settings.theme);
+    const themeColors = [
+      { name: '天空藍', hex: '#4A9CC7' }, { name: '櫻花粉', hex: '#E58CA0' }, { name: '抹茶綠', hex: '#6E9B5B' },
+      { name: '楓葉橘', hex: '#D9763A' }, { name: '薰衣草紫', hex: '#8E7CC3' }, { name: '琥珀黃', hex: '#D9A441' },
+    ];
+    const fxOptions = [
+      { id: 'none', icon: '✖️', label: '無' }, { id: 'maple', icon: '🍁', label: '楓葉' },
+      { id: 'snow', icon: '❄️', label: '雪花' }, { id: 'sakura', icon: '🌸', label: '櫻花' },
+    ];
+    const hexRgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+    const mixRgb = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+    const applyTheme = () => {
+      const root = document.documentElement, p = hexRgb(/^#[0-9a-f]{6}$/i.test(settings.theme) ? settings.theme : '#4A9CC7');
+      root.dataset.theme = settings.dark ? 'dark' : 'light';
+      root.style.fontSize = settings.font + 'px';
+      const set = (k, rgb) => root.style.setProperty(k, rgb.join(' '));
+      set('--sky-deep', settings.dark ? mixRgb(p, [255, 255, 255], .2) : p);
+      set('--sky', mixRgb(p, [255, 255, 255], settings.dark ? .1 : .42));
+      set('--sky-soft', settings.dark ? mixRgb(p, [28, 31, 36], .78) : mixRgb(p, [255, 255, 255], .88));
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', settings.dark ? '#1C1F24' : '#' + mixRgb(p, [255, 255, 255], .42).map(v => v.toString(16).padStart(2, '0')).join(''));
+    };
+    const setTheme = hex => { settings.theme = hex; customColor.value = hex; };
+    watch(settings, () => {
+      applyTheme();
+      try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch {}
+    }, { deep: true, immediate: true });
+
+    // falling leaves / snow / petals on a fixed canvas (emoji glyphs, pauses when the tab is hidden)
+    const fxCanvas = ref(null);
+    const FX = {
+      maple: { chars: ['🍁', '🍂', '🍁'], n: 16, size: [16, 28], vy: [.5, 1.3] },
+      snow: { chars: ['❄️', '❅', '❆'], n: 26, size: [10, 22], vy: [.4, 1.1] },
+      sakura: { chars: ['🌸', '🌸', '💮'], n: 18, size: [14, 24], vy: [.4, 1] },
+    };
+    let fxRaf = 0, fxParts = [];
+    const stopFx = () => {
+      cancelAnimationFrame(fxRaf); fxRaf = 0; fxParts = [];
+      const c = fxCanvas.value; if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    };
+    const startFx = () => {
+      stopFx();
+      const kind = FX[settings.fx], c = fxCanvas.value;
+      if (!kind || !c || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2), ctx = c.getContext('2d');
+      c.width = innerWidth * dpr; c.height = innerHeight * dpr;
+      const rnd = (a, b) => a + Math.random() * (b - a);
+      fxParts = Array.from({ length: kind.n }, () => ({
+        x: rnd(0, innerWidth), y: rnd(-innerHeight, innerHeight), s: rnd(...kind.size), vy: rnd(...kind.vy),
+        ph: rnd(0, 6.28), sw: rnd(.4, 1.4), rot: rnd(0, 6.28), vr: rnd(-.025, .025), a: rnd(.6, .95),
+        ch: kind.chars[Math.floor(Math.random() * kind.chars.length)],
+      }));
+      const tick = () => {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, innerWidth, innerHeight);
+        for (const p of fxParts) {
+          p.y += p.vy; p.ph += .02; p.x += Math.sin(p.ph) * p.sw; p.rot += p.vr;
+          if (p.y > innerHeight + 30) { p.y = -30; p.x = rnd(0, innerWidth); }
+          ctx.save(); ctx.globalAlpha = p.a; ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+          ctx.font = `${p.s}px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(p.ch, 0, 0); ctx.restore();
+        }
+        fxRaf = requestAnimationFrame(tick);
+      };
+      tick();
+    };
+    watch(() => settings.fx, () => nextTick(startFx));
+    onMounted(() => {
+      nextTick(startFx);
+      window.addEventListener('resize', () => { if (fxRaf) startFx(); });
+      document.addEventListener('visibilitychange', () => (document.hidden ? stopFx() : startFx()));
+    });
 
     /* ----- cloud sync (Firebase Firestore, optional) ----- */
     const cfg = window.FIREBASE_CONFIG || {};
@@ -546,6 +628,7 @@ createApp({
 
     return {
       sync, connectSync, disconnectSync,
+      settings, customColor, themeColors, fxOptions, setTheme, fxCanvas,
       budget, editBudget, spentMyr, plannedJpy, plannedMyr, remaining, overBudget, budgetPct, expByCat, donut,
       checklist, newCheck, doneCount, checkPct, addCheck, removeCheck, myr, onJpy, onMyr,
       countInfo, progress, nextFlight, shopDone, todayItems, goTo,
