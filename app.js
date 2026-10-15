@@ -2,6 +2,7 @@ const { createApp, ref, reactive, computed, watch, onMounted, nextTick } = Vue;
 
 /* ---------- static trip data ---------- */
 const TRIP_DAYS = ['2026-11-21','2026-11-22','2026-11-23','2026-11-24','2026-11-25','2026-11-26','2026-11-27','2026-11-28','2026-11-29'];
+const TRIP_START = '2026-11-21', TRIP_END = '2026-11-29';
 const KIX = { lat: 34.4320, lng: 135.2304, name: '關西機場 KIX' };
 
 const FLIGHTS = [
@@ -31,6 +32,9 @@ const EXP_CATS = ['交通', '飲食', '住宿', '門票', '購物', '其他'];
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
+// in-park slot on 25 Nov (USJ): stays inside the park, so no travel connector
+const park = (time, name, extra = {}) => ({ id: uid(), date: '2026-11-25', category: '景點', name, time, address: 'Universal Studios Japan, Osaka', lat: 34.6654, lng: 135.4323, noTravel: true, ...extra });
+
 const defaultItems = () => [
   { id: uid(), date: '2026-11-21', category: '航班', flightId: 'f1', name: 'VN680 KUL → HAN' },
   { id: uid(), date: '2026-11-21', category: '航班', flightId: 'f2', name: 'VN334 HAN → KIX' },
@@ -46,13 +50,46 @@ const defaultItems = () => [
   { id: uid(), date: '2026-11-23', category: '景點', name: '常寂光寺', address: 'Jojakkoji, Kyoto', lat: 35.0197, lng: 135.6642, hours: '約 09:00 – 17:00', ticket: '約 ¥500', note: '嵐山賞楓名所，仁王門與多寶塔配紅葉很上相，坡道較多' },
   { id: uid(), date: '2026-11-23', category: '景點', name: '渡月橋', address: 'Togetsukyo Bridge, Kyoto', lat: 35.0094, lng: 135.6779, hours: '24 小時', ticket: '免費', note: '嵐山地標，傍晚的河岸與山景很美' },
   { id: uid(), date: '2026-11-23', category: '美食', name: '嵐山午餐（待定）', note: '湯豆腐 / 蕎麥麵 / 抹茶甜點' },
-  { id: uid(), date: '2026-11-24', category: '住宿', name: 'Ebisu 804 入住', address: 'Ebisuhonmachi Naniwa Osaka', lat: 34.6537, lng: 135.5013, hours: 'Check-in 15:00', note: '上午退房 Daiya Ryokan，前往大阪' },
-  { id: uid(), date: '2026-11-25', category: '景點', name: '日本環球影城 USJ', address: 'Universal Studios Japan, Osaka', lat: 34.6654, lng: 135.4323, hours: '當日開園時間請查官網（11 月多為 08:30–09:00 左右，實際常提早 10–30 分鐘入園）', ticket: '依購買的票種與快速通關而定', note: '預計 06:15 左右出發，07:00–07:30 到門口排隊（頂門）。先玩最想玩的：馬力歐賽車與任天堂園區優先。出發前先下載 USJ 官方 App 並登入。快速通關購買後確認含「任天堂園區入場」。' },
+  { id: uid(), date: '2026-11-24', category: '住宿', name: '退房 Daiya Ryokan', address: 'Daiya Ryokan Kyoto', lat: 34.9877, lng: 135.7587, noTravel: true, hours: 'Check-out 請向旅館確認（通常約 10:00–11:00）', note: '退房後請旅館代為保管行李，傍晚前取回。若不想帶行李逛，可跳過下面兩個選擇性景點，直接去大阪' },
+  { id: uid(), date: '2026-11-24', category: '景點', name: '永觀堂（選擇性）', address: 'Eikando Zenrinji, Kyoto', lat: 35.0053, lng: 135.7947, hours: '約 09:00 – 17:00（紅葉季可能有夜間特別拜觀）', ticket: '約 ¥1,000（以官網為準）', note: '京都紅葉名所，庭園與池畔倒影很美；與南禪寺步行約 5–10 分鐘' },
+  { id: uid(), date: '2026-11-24', category: '景點', name: '南禪寺（選擇性）', address: 'Nanzen-ji, Kyoto', lat: 35.0113, lng: 135.7940, hours: '約 08:40 – 16:40', ticket: '境內免費；方丈庭園、三門各約 ¥600', note: '水路閣紅磚拱橋配紅葉很上相，可只逛境內免費區域' },
+  { id: uid(), date: '2026-11-24', category: '住宿', name: 'Ebisu 804 入住', address: 'Ebisuhonmachi Naniwa Osaka', lat: 34.6537, lng: 135.5013, hours: 'Check-in 時間請向房東確認', travelMode: '電車', travelMin: 120, travelNote: '估算：到京都站（取行李）→ JR 新快速到大阪 → 環狀線到新今宮 → 步行；請用 Google Maps 查實際班次', note: '先放行李，請提前聯絡房東能否提早寄放。晚上早點休息，明天要 USJ 頂門' },
+  { id: uid(), date: '2026-11-24', category: '景點', name: '新世界・通天閣', address: 'Tsutenkaku, Osaka', lat: 34.6525, lng: 135.5063, hours: '展望台約 10:00 – 19:00（請查官網）', ticket: '展望台約 ¥1,000', note: '離住處步行可到。復古街區、串炸店很多；晚餐可在這邊吃' },
+  { id: uid(), date: '2026-11-24', category: '美食', name: '道頓堀晚餐', address: 'Dotonbori, Osaka', lat: 34.6687, lng: 135.5013, hours: '店家各異', note: '看固力果招牌、吃章魚燒。明天要早起，建議 21:00 前回住處' },
+  { id: uid(), date: '2026-11-25', category: '景點', name: '前往 USJ・開園前排隊', time: '07:30', address: 'Universal Studios Japan, Osaka', lat: 34.6654, lng: 135.4323, travelMode: '電車', travelMin: 40, travelNote: '估算：Ebisucho 站 → 轉車（新今宮／西九條）→ Universal City，路線規劃約 38 分；06:15 左右出發，請用 Google Maps 查實際班次', hours: '官方 09:00 開園，實際約 08:15–09:00 入園（以官網為準）', ticket: 'Express 4 ～トロッコ＆ジョーズ～', note: '07:30 前到門口排隊。出發前先下載 USJ 官方 App 並登入，票放手機。' },
+  park('08:30', '飛天翼龍（直接排）', { note: '開園後直奔，早上排隊最短。身高需 132–198 公分，先寄放隨身物品。' }),
+  park('09:30', 'JAWS（直接排）', { note: '早上較好排。與飛天翼龍、侏羅紀公園同一區，走路少。' }),
+  park('10:15', '侏羅紀公園乘車游（Express 自選）', { note: '使用 Express「JAWS 或 侏羅紀」二選一的名額，選侏羅紀（JAWS 已直接排）。' }),
+  park('11:00', '哈利波特魔法世界（Express 自選）', { note: '禁忌之旅用 Express「飛天翼龍 或 哈利波特」名額，選哈利波特（飛天翼龍已直接排）。再逛鷹馬飛行、喝黃油啤酒。若需區域整理券請看 App。' }),
+  park('12:30', '午餐（任天堂入場前吃完）', { category: '美食', note: '13:20 前吃完、上廁所。給自己 20 分鐘從魔法世界走到任天堂的緩衝。' }),
+  park('13:50', '超級任天堂世界入場（Express 指定）', { hours: '13:50 起入場，再入場不可', ticket: 'Express 含入場', note: '離開後不能再用同一次入場進去，進去前先安排好。' }),
+  park('13:50', '馬力歐賽車 ～庫巴的挑戰書～', { hours: '13:50–14:20（Express 指定時段）' }),
+  park('14:20', '咚奇剛的瘋狂礦車', { hours: '14:20–14:50（Express 指定時段）' }),
+  park('14:50', '任天堂園區自由逛', { note: '耀西冒險、庫巴城堡、商店與餐廳。14:00 的 NoLimit 遊行會錯過，可放棄。' }),
+  park('16:00', '小黃人園區與其他想玩的', { note: '小黃人、好萊塢區。看 App 即時排隊時間調整。' }),
+  park('17:30', '晚餐・燈飾', { category: '美食', note: '官方 21:00 關園，建議 20:30 前離園，回住處好好休息。' }),
   { id: uid(), date: '2026-11-26', category: '景點', name: '（待安排）', note: '' },
   { id: uid(), date: '2026-11-27', category: '美食', name: '（待安排）', note: '' },
   { id: uid(), date: '2026-11-28', category: '購物', name: '（待安排）', note: '' },
   { id: uid(), date: '2026-11-29', category: '航班', flightId: 'f3', name: 'VN335 KIX → HAN' },
   { id: uid(), date: '2026-11-29', category: '航班', flightId: 'f4', name: 'VN681 HAN → KUL' },
+];
+
+const defaultChecklist = () => [
+  { id: uid(), text: '護照', note: '確認有效期', done: false },
+  { id: uid(), text: 'Visit Japan Web 填寫', note: '入境審查＋海關申報，取得 QR Code，出發前完成', done: false },
+  { id: uid(), text: 'eSIM', note: '出發前先買好並設定，落地後開啟', done: false },
+  { id: uid(), text: '旅遊保險', note: '含醫療與行李延誤，保單截圖存手機', done: false },
+  { id: uid(), text: '電子機票 / 登機證', note: 'VN680、VN334、VN335、VN681', done: false },
+  { id: uid(), text: 'USJ 快速通關 & 官方 App', note: '票放在手機、先登入 App', done: false },
+  { id: uid(), text: '聯絡 Daiya Ryokan', note: '22 日上午 10:00 前後寄放行李；24 日退房後寄放行李', done: false },
+  { id: uid(), text: '聯絡 Ebisu 804 房東', note: '確認入住時間與 24 日能否提早寄放行李', done: false },
+  { id: uid(), text: '日幣現金 / 信用卡', note: '確認海外刷卡與提款手續費', done: false },
+  { id: uid(), text: '手機、充電器、行動電源', done: false },
+  { id: uid(), text: '轉接頭', done: false },
+  { id: uid(), text: '常用藥品', done: false },
+  { id: uid(), text: '保暖外套 / 雨具', note: '11 月底京阪早晚約 5–15°C', done: false },
+  { id: uid(), text: '行李打包', done: false },
 ];
 
 /* ---------- storage ---------- */
@@ -81,6 +118,7 @@ const WCODE = code => {
 };
 
 const ICONS = {
+  home: '<path d="M3 11l9-8 9 8M5 9.5V20h5v-6h4v6h5V9.5"/>',
   pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/>',
   info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
   basket: '<path d="M4 10h16l-1.6 9a2 2 0 01-2 1.7H7.6a2 2 0 01-2-1.7zM8 10l3-6M16 10l-3-6M9.5 14v3M12 14v3M14.5 14v3"/>',
@@ -140,12 +178,13 @@ createApp({
   components: { Ic, FlightCard },
   setup() {
     const tabs = [
-      { id: 'plan', icon: 'pin', label: '每日行程' },
+      { id: 'home', icon: 'home', label: '主頁' },
+      { id: 'plan', icon: 'pin', label: '行程' },
       { id: 'info', icon: 'info', label: '資訊' },
-      { id: 'shop', icon: 'basket', label: '購物清單' },
+      { id: 'shop', icon: 'basket', label: '購物' },
       { id: 'cost', icon: 'yen', label: '花費' },
     ];
-    const tab = ref('plan');
+    const tab = ref('home');
     const days = TRIP_DAYS;
     const t = todayStr();
     const selectedDate = ref(days.includes(t) ? t : days[0]);
@@ -153,10 +192,12 @@ createApp({
     const items = ref(saved.items || defaultItems());
     const shop = ref(saved.shop || []);
     const exps = ref(saved.exps || []);
+    const budget = ref(saved.budget || { total: 3000 }); // MYR
+    const checklist = ref(saved.checklist || defaultChecklist());
     const flights = FLIGHTS, hotels = HOTELS;
 
-    watch([items, shop, exps], () => {
-      try { localStorage.setItem(KEY, JSON.stringify({ items: items.value, shop: shop.value, exps: exps.value })); }
+    watch([items, shop, exps, budget, checklist], () => {
+      try { localStorage.setItem(KEY, JSON.stringify({ items: items.value, shop: shop.value, exps: exps.value, budget: budget.value, checklist: checklist.value })); }
       catch (e) { console.warn('storage full', e); }
     }, { deep: true });
 
@@ -164,7 +205,7 @@ createApp({
     const cfg = window.FIREBASE_CONFIG || {};
     const syncOn = !!(cfg.apiKey && window.firebase);
     const sync = reactive({ available: syncOn, code: localStorage.getItem('trip-code') || '', input: localStorage.getItem('trip-code') || '', status: syncOn ? '未連線' : '尚未設定 Firebase', ok: false });
-    const stores = { items, shop, exps };
+    const stores = { items, shop, exps, budget, checklist };
     const lastRemote = {};
     let fdb = null, unsubs = [], timers = {};
     const docOf = key => fdb.collection('trips').doc(sync.code).collection('data').doc(key);
@@ -184,7 +225,8 @@ createApp({
           sync.ok = true; sync.status = '已同步 ✓';
           if (snap.metadata.hasPendingWrites) return;
           if (!snap.exists) { pushRemote(key); return; } // first device uploads its data
-          const remote = snap.data().data || [];
+          const remote = snap.data().data;
+          if (remote === undefined) return;
           const str = JSON.stringify(remote);
           if (str === lastRemote[key]) return;
           lastRemote[key] = str;
@@ -278,12 +320,12 @@ createApp({
     };
 
     /* ----- weather ----- */
-    const weather = reactive({ icon: '🌤️', label: '', temp: null, feels: null, loading: false });
+    const weather = reactive({ icon: '🌤️', label: '', temp: null, feels: null, hi: null, lo: null, loading: false });
     const placeOf = d => (PLACES[d] || OSAKA).name;
     const wCache = {};
     const loadWeather = async d => {
       const p = PLACES[d] || OSAKA;
-      weather.loading = true; weather.temp = null; weather.icon = '🌤️'; weather.label = '';
+      weather.loading = true; weather.temp = null; weather.hi = null; weather.lo = null; weather.icon = '🌤️'; weather.label = '';
       const key = d;
       try {
         if (!wCache[key]) {
@@ -295,15 +337,15 @@ createApp({
               const dd = j.daily;
               if (dd && dd.temperature_2m_max?.[0] != null) {
                 const [ic, lb] = WCODE(dd.weather_code[0]);
-                data = { icon: ic, label: lb + '（預報）', temp: Math.round((dd.temperature_2m_max[0] + dd.temperature_2m_min[0]) / 2), feels: Math.round((dd.apparent_temperature_max[0] + dd.apparent_temperature_min[0]) / 2) };
+                data = { icon: ic, label: lb + '（預報）', temp: Math.round((dd.temperature_2m_max[0] + dd.temperature_2m_min[0]) / 2), feels: Math.round((dd.apparent_temperature_max[0] + dd.apparent_temperature_min[0]) / 2), hi: Math.round(dd.temperature_2m_max[0]), lo: Math.round(dd.temperature_2m_min[0]) };
               }
             }
           } catch {}
           if (!data) { // forecast not yet available -> current conditions
-            const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lng}&current=temperature_2m,apparent_temperature,weather_code&timezone=auto`);
+            const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lng}&current=temperature_2m,apparent_temperature,weather_code&daily=temperature_2m_max,temperature_2m_min&forecast_days=1&timezone=auto`);
             const j = await r.json();
             const [ic, lb] = WCODE(j.current.weather_code);
-            data = { icon: ic, label: lb + '（目前；行前 16 天內自動顯示當日預報）', temp: Math.round(j.current.temperature_2m), feels: Math.round(j.current.apparent_temperature) };
+            data = { icon: ic, label: lb + '（目前；行前 16 天內自動顯示當日預報）', temp: Math.round(j.current.temperature_2m), feels: Math.round(j.current.apparent_temperature), hi: Math.round(j.daily.temperature_2m_max[0]), lo: Math.round(j.daily.temperature_2m_min[0]) };
           }
           wCache[key] = data;
         }
@@ -314,14 +356,16 @@ createApp({
     watch(selectedDate, loadWeather, { immediate: true });
 
     /* ----- exchange ----- */
-    const jpy = ref(null);
+    const jpy = ref(null), myr = ref(null);
     const rate = reactive({ v: 0.029, note: '離線預設值' });
+    const onJpy = () => { myr.value = jpy.value ? +(jpy.value * rate.v).toFixed(2) : null; };
+    const onMyr = () => { jpy.value = myr.value ? Math.round(myr.value / rate.v) : null; };
     const fmt = (n, dp = 0) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     onMounted(async () => {
       try {
         const r = await fetch('https://open.er-api.com/v6/latest/JPY');
         const j = await r.json();
-        if (j.rates?.MYR) { rate.v = j.rates.MYR; rate.note = '更新：' + (j.time_last_update_utc || '').slice(0, 16); }
+        if (j.rates?.MYR) { rate.v = j.rates.MYR; rate.note = '更新：' + (j.time_last_update_utc || '').slice(0, 16); onJpy(); }
       } catch {}
       scrollDateIntoView();
     });
@@ -330,7 +374,7 @@ createApp({
     const modal = ref(null);
     const confirmDel = ref(false);
     const saving = ref(false);
-    const blank = () => ({ id: null, date: selectedDate.value, category: '景點', name: '', address: '', hours: '', ticket: '', note: '', lat: null, lng: null, travelMode: '', travelMin: null, travelNote: '' });
+    const blank = () => ({ id: null, date: selectedDate.value, category: '景點', name: '', address: '', hours: '', ticket: '', note: '', time: '', cost: null, lat: null, lng: null, travelMode: '', travelMin: null, travelNote: '' });
     const form = reactive(blank());
     const openAdd = () => { Object.assign(form, blank()); confirmDel.value = false; modal.value = 'plan'; };
     const openEdit = it => { Object.assign(form, blank(), JSON.parse(JSON.stringify(it))); confirmDel.value = false; modal.value = 'plan'; };
@@ -428,11 +472,66 @@ createApp({
     const totalExp = computed(() => exps.value.reduce((s, e) => s + (+e.amount || 0), 0));
     const sortedExp = computed(() => [...exps.value].sort((a, b) => b.date.localeCompare(a.date)));
 
+    /* ----- budget (MYR) ----- */
+    const spentMyr = computed(() => totalExp.value * rate.v);
+    const plannedJpy = computed(() => items.value.reduce((s, i) => s + (+i.cost || 0), 0));
+    const plannedMyr = computed(() => plannedJpy.value * rate.v);
+    const remaining = computed(() => (+budget.value.total || 0) - spentMyr.value);
+    const overBudget = computed(() => remaining.value < 0);
+    const budgetPct = computed(() => budget.value.total > 0 ? Math.min(100, spentMyr.value / budget.value.total * 100) : 0);
+    const CAT_COLORS = ['#8FCDEB', '#F4B9C4', '#9DC18A', '#F5C26B', '#B7A6E0', '#C9C5BD'];
+    const expByCat = computed(() => {
+      const total = totalExp.value;
+      return EXP_CATS.map((c, i) => ({ c, color: CAT_COLORS[i], jpy: exps.value.filter(e => e.category === c).reduce((s, e) => s + (+e.amount || 0), 0) }))
+        .filter(x => x.jpy > 0).map(x => ({ ...x, pct: total ? x.jpy / total * 100 : 0 }));
+    });
+    const donut = computed(() => {
+      let acc = 0;
+      const stops = expByCat.value.map(x => { const a = acc; acc += x.pct; return `${x.color} ${a}% ${acc}%`; });
+      return stops.length ? `conic-gradient(${stops.join(',')})` : '#E7E2D6';
+    });
+    const editBudget = ref(false);
+
+    /* ----- checklist ----- */
+    const newCheck = ref('');
+    const doneCount = computed(() => checklist.value.filter(c => c.done).length);
+    const checkPct = computed(() => checklist.value.length ? doneCount.value / checklist.value.length * 100 : 0);
+    const addCheck = () => { const t = newCheck.value.trim(); if (!t) return; checklist.value.push({ id: uid(), text: t, done: false }); newCheck.value = ''; };
+    const removeCheck = c => { checklist.value = checklist.value.filter(x => x.id !== c.id); };
+
+    /* ----- home: countdown card ----- */
+    const countInfo = computed(() => {
+      const n = new Date(), today = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+      const s = new Date(TRIP_START + 'T00:00:00'), e = new Date(TRIP_END + 'T00:00:00');
+      const d = Math.round((s - today) / 864e5);
+      if (d > 0) return { mode: 'before', n: d };
+      if (today <= e) return { mode: 'during', n: 1 - d };
+      return { mode: 'after', n: 0 };
+    });
+    // a day counts as planned when it has at least one item that isn't a "待安排 / 待定" placeholder
+    const plannedDays = computed(() => days.filter(d => items.value.some(i => i.date === d && !/待/.test(i.name))).length);
+    const progress = computed(() => {
+      const c = countInfo.value;
+      if (c.mode === 'before') return { pct: Math.round(plannedDays.value / days.length * 100), label: `行程規劃 ${plannedDays.value}/${days.length} 天已排` };
+      if (c.mode === 'during') return { pct: Math.round(c.n / days.length * 100), label: `旅程進行 第 ${c.n}/${days.length} 天` };
+      return { pct: 100, label: '旅程完成' };
+    });
+    const nextFlight = computed(() => {
+      const now = Date.now();
+      return FLIGHTS.find(f => new Date(`${f.date}T${f.dep}:00`).getTime() > now) || null;
+    });
+    const shopDone = computed(() => shop.value.filter(s => s.done).length);
+    const todayItems = computed(() => countInfo.value.mode === 'during' ? items.value.filter(i => i.date === todayStr()) : []);
+    const goTo = id => { tab.value = id; window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
     const fabAction = () => ({ plan: openAdd, shop: openShop, cost: () => openExp(null) }[tab.value]());
     const resetAll = () => { if (confirm('用程式內建的行程覆蓋目前所有行程（購物清單與花費不受影響）？你手動新增或修改的行程會被取代。')) { items.value = defaultItems(); selectedDate.value = days[0]; } };
 
     return {
       sync, connectSync, disconnectSync,
+      budget, editBudget, spentMyr, plannedJpy, plannedMyr, remaining, overBudget, budgetPct, expByCat, donut,
+      checklist, newCheck, doneCount, checkPct, addCheck, removeCheck, myr, onJpy, onMyr,
+      countInfo, progress, nextFlight, shopDone, todayItems, goTo,
       tabs, tab, days, selectedDate, wd, dayItems, flights, hotels, flightById, catEmoji, catStyle, hasHours, expEmoji,
       travel, routeUrl, modes: Object.keys(MODE_ICON), navUrl, openNav, weather, placeOf, jpy, rate, fmt,
       modal, form, cats: CATS, confirmDel, saving, openEdit, closeModal, saveItem, deleteItem,
