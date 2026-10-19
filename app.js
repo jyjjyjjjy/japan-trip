@@ -92,6 +92,13 @@ const defaultChecklist = () => [
   { id: uid(), text: '行李打包', done: false },
 ];
 
+const TODO_CATS = ['食物', '衣服', '美容', '門票', '其它'];
+const defaultTodos = () => [
+  { id: uid(), name: '帶給男朋友的本地食物', category: '食物', priority: '重要', due: '', note: '挑不易壞、可托運的；先確認日本入境可帶的食品', link: '', done: false },
+  { id: uid(), name: '買旅行新衣服', category: '衣服', priority: '一般', due: '', note: '11 月底京阪早晚約 5–15°C，帶保暖層次', link: '', done: false },
+  { id: uid(), name: '景點門票（待補清單）', category: '門票', priority: '重要', due: '', note: '先把要預訂的景點列出來，再逐項拆成待辦', link: '', done: false },
+];
+
 /* ---------- storage ---------- */
 const KEY = 'trip-kansai-v1';
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
@@ -119,6 +126,8 @@ const WCODE = code => {
 
 const ICONS = {
   home: '<path d="M3 11l9-8 9 8M5 9.5V20h5v-6h4v6h5V9.5"/>',
+  clipboard: '<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4h6v3H9zM9 13l2 2 4-4.5"/>',
+  link: '<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>',
   palette: '<circle cx="13.5" cy="6.5" r=".8" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".8" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".8" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".8" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.7-.8 1.7-1.7 0-.4-.2-.8-.5-1.1-.3-.3-.4-.7-.4-1.1 0-.9.8-1.7 1.7-1.7H16c3.3 0 6-2.7 6-6 0-4.9-4.5-8.4-10-8.4z"/>',
   type: '<path d="M4 7V4h16v3M9 20h6M12 4v16"/>',
@@ -188,6 +197,7 @@ createApp({
       { id: 'plan', icon: 'pin', label: '行程' },
       { id: 'info', icon: 'info', label: '資訊' },
       { id: 'shop', icon: 'basket', label: '購物' },
+      { id: 'todo', icon: 'clipboard', label: '準備' },
       { id: 'cost', icon: 'yen', label: '花費' },
       { id: 'settings', icon: 'gear', label: '設置' },
     ];
@@ -201,10 +211,11 @@ createApp({
     const exps = ref(saved.exps || []);
     const budget = ref(saved.budget || { total: 3000 }); // MYR
     const checklist = ref(saved.checklist || defaultChecklist());
+    const todos = ref(saved.todos || defaultTodos());
     const flights = FLIGHTS, hotels = HOTELS;
 
-    watch([items, shop, exps, budget, checklist], () => {
-      try { localStorage.setItem(KEY, JSON.stringify({ items: items.value, shop: shop.value, exps: exps.value, budget: budget.value, checklist: checklist.value })); }
+    watch([items, shop, exps, budget, checklist, todos], () => {
+      try { localStorage.setItem(KEY, JSON.stringify({ items: items.value, shop: shop.value, exps: exps.value, budget: budget.value, checklist: checklist.value, todos: todos.value })); }
       catch (e) { console.warn('storage full', e); }
     }, { deep: true });
 
@@ -308,7 +319,7 @@ createApp({
     const cfg = window.FIREBASE_CONFIG || {};
     const syncOn = !!(cfg.apiKey && window.firebase);
     const sync = reactive({ available: syncOn, code: localStorage.getItem('trip-code') || '', input: localStorage.getItem('trip-code') || '', status: syncOn ? '未連線' : '尚未設定 Firebase', ok: false });
-    const stores = { items, shop, exps, budget, checklist };
+    const stores = { items, shop, exps, budget, checklist, todos };
     const lastRemote = {};
     let fdb = null, unsubs = [], timers = {};
     const docOf = key => fdb.collection('trips').doc(sync.code).collection('data').doc(key);
@@ -575,6 +586,43 @@ createApp({
     };
     const deleteShop = () => { shop.value = shop.value.filter(x => x.id !== sform.id); closeModal(); };
 
+    /* ----- pre-trip to-dos (buy / prepare) ----- */
+    const blankTodo = () => ({ id: null, name: '', category: '食物', priority: '一般', due: '', note: '', link: '', done: false });
+    const tform = reactive(blankTodo());
+    const openTodo = t => { Object.assign(tform, t && t.id ? { ...blankTodo(), ...t } : blankTodo()); confirmDel.value = false; modal.value = 'todo'; };
+    const saveTodo = () => {
+      const d = { ...tform, name: tform.name.trim(), link: (tform.link || '').trim() };
+      if (d.link && !/^https?:\/\//i.test(d.link)) d.link = 'https://' + d.link;
+      if (d.id) Object.assign(todos.value.find(x => x.id === d.id), d);
+      else { d.id = uid(); d.done = false; todos.value.unshift(d); }
+      closeModal();
+    };
+    const deleteTodo = () => { todos.value = todos.value.filter(x => x.id !== tform.id); closeModal(); };
+    const todoEmoji = c => ({ 食物: '🍱', 衣服: '👕', 美容: '💄', 門票: '🎟️', 其它: '📌' }[c] || '📌');
+    const todoCat = t => t.category || '其它';
+    const todoImg = c => ({ 食物: 'cat-food.png', 衣服: 'cat-clothes.png', 美容: 'cat-beauty.png', 門票: 'cat-ticket.png', 其它: 'cat-other.png' }[c] || 'cat-other.png');
+    const todoFilter = ref('全部');
+    const todoOnlyImportant = ref(false);
+    const todoMatch = t => (todoFilter.value === '全部' || todoCat(t) === todoFilter.value) && (!todoOnlyImportant.value || t.priority === '重要');
+    const todoPending = computed(() => todos.value.filter(t => !t.done && todoMatch(t)).sort((a, b) =>
+      (a.due || '9999').localeCompare(b.due || '9999') || (b.priority === '重要') - (a.priority === '重要')));
+    const todoDone = computed(() => todos.value.filter(t => t.done && todoMatch(t)));
+    const todoLeft = computed(() => todos.value.filter(t => !t.done).length);
+    const todoFinished = computed(() => todos.value.filter(t => t.done).length);
+    const todoPct = computed(() => todos.value.length ? Math.round(todoFinished.value / todos.value.length * 100) : 0);
+    const todoCatCount = c => todos.value.filter(t => !t.done && (c === '全部' || todoCat(t) === c)).length;
+    const dueInfo = t => {
+      if (!t.due) return null;
+      const n = new Date(), today = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+      const d = Math.round((new Date(t.due + 'T00:00:00') - today) / 864e5), md = t.due.slice(5).replace('-', '/');
+      if (t.done) return { text: md, tone: 'ok' };
+      if (d < 0) return { text: `已逾期 ${-d} 天`, tone: 'late' };
+      if (d === 0) return { text: '今天截止', tone: 'late' };
+      if (d <= 7) return { text: `${d} 天內截止`, tone: 'soon' };
+      return { text: `${md} 前`, tone: 'ok' };
+    };
+    const stickerFail = e => { e.target.style.display = 'none'; const s = e.target.nextElementSibling; if (s) s.style.display = 'block'; };
+
     /* ----- expenses ----- */
     const eform = reactive({ id: null, category: '飲食', name: '', date: todayStr(), amount: null, pay: '現金', note: '' });
     const openExp = e => {
@@ -648,6 +696,8 @@ createApp({
 
     return {
       sync, connectSync, disconnectSync,
+      todos, tform, todoCats: TODO_CATS, openTodo, saveTodo, deleteTodo, todoEmoji, todoImg, todoCat, todoFilter, todoOnlyImportant,
+      todoPending, todoDone, todoLeft, todoFinished, todoPct, todoCatCount, dueInfo, stickerFail,
       settings, customColor, themeColors, fxOptions, setTheme, fxCanvas,
       budget, editBudget, spentMyr, plannedJpy, plannedMyr, remaining, overBudget, budgetPct, expByCat, donut,
       checklist, newCheck, doneCount, checkPct, addCheck, removeCheck, myr, onJpy, onMyr,

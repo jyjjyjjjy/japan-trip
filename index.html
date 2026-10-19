@@ -367,6 +367,86 @@
       </div>
     </section>
 
+    ﻿    <!-- ===== Pre-trip to-dos ===== -->
+    <section v-show="tab==='todo'" class="space-y-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="font-maru text-2xl font-bold">出發前準備</h2>
+          <p class="mt-1 text-sm text-ink/45">要買的、要訂的，都記在這裡</p>
+        </div>
+        <button @click="openTodo()" class="flex items-center gap-1.5 rounded-full bg-sakura-deep px-5 py-3 text-sm font-bold text-white shadow-[0_4px_0_#C96F85] transition active:translate-y-0.5 active:shadow-none">
+          <ic name="plus" class="h-4 w-4"></ic>新增
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="relative min-h-[104px] overflow-hidden rounded-3xl border border-ink/10 bg-white/70 p-4 shadow-[0_3px_0_rgba(157,193,138,.35)]">
+          <div class="font-maru text-4xl font-bold">{{ todoLeft }}</div>
+          <div class="mt-0.5 text-sm text-ink/45">待完成</div>
+          <img src="sticker-todo.png" alt="" @error="stickerFail" class="pointer-events-none absolute bottom-1.5 right-1.5 h-[84px] w-auto select-none drop-shadow-sm">
+          <span style="display:none" class="absolute bottom-3 right-4 text-5xl">📝</span>
+        </div>
+        <div class="relative min-h-[104px] overflow-hidden rounded-3xl border border-ink/10 bg-white/70 p-4 shadow-[0_3px_0_rgba(157,193,138,.35)]">
+          <div class="font-maru text-4xl font-bold">{{ todoFinished }}</div>
+          <div class="mt-0.5 text-sm text-ink/45">已完成</div>
+          <img src="sticker-todo-done.png" alt="" @error="stickerFail" class="pointer-events-none absolute bottom-1.5 right-1.5 h-[84px] w-auto select-none drop-shadow-sm">
+          <span style="display:none" class="absolute bottom-3 right-4 text-5xl">🎉</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="mb-1 flex justify-between text-[11px] text-ink/45"><span>完成進度</span><span>{{ todoPct }}%</span></div>
+        <div class="h-2 overflow-hidden rounded-full bg-sky-soft"><div class="h-full rounded-full bg-sky-deep transition-all duration-500" :style="{width: todoPct+'%'}"></div></div>
+      </div>
+
+      <div class="flex items-center justify-between gap-3">
+        <h3 class="font-maru text-lg font-bold">待完成</h3>
+        <div class="flex items-center gap-2">
+          <button @click="todoOnlyImportant=!todoOnlyImportant" class="rounded-full border px-3.5 py-2 text-xs font-medium transition"
+            :class="todoOnlyImportant ? 'border-sakura-deep bg-sakura-soft text-sakura-deep' : 'border-ink/10 bg-white text-ink/50'">只看重要</button>
+          <div class="relative">
+            <select v-model="todoFilter" class="appearance-none rounded-full border border-ink/10 bg-white py-2 pl-4 pr-9 text-sm font-medium outline-none focus:border-sky">
+              <option value="全部">全部 ({{ todoCatCount('全部') }})</option>
+              <option v-for="c in todoCats" :key="c" :value="c">{{ todoEmoji(c) }} {{ c }} ({{ todoCatCount(c) }})</option>
+            </select>
+            <span class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-ink/40">▼</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div v-for="t in todoPending" :key="t.id" class="flex items-center gap-3 rounded-3xl border border-ink/10 bg-white p-3 shadow-sm">
+          <input type="checkbox" v-model="t.done" class="h-6 w-6 shrink-0 accent-sky-deep" aria-label="已完成">
+          <img :src="todoImg(todoCat(t))" alt="" class="h-14 w-14 shrink-0 select-none object-contain drop-shadow-sm">
+          <div class="min-w-0 flex-1">
+            <div class="font-bold leading-snug">{{ t.name }}</div>
+            <div class="mt-1 flex flex-wrap gap-1.5">
+              <span class="rounded-full border border-ink/15 px-2.5 py-0.5 text-[11px] font-medium">{{ todoCat(t) }}</span>
+              <span class="rounded-full border px-2.5 py-0.5 text-[11px] font-medium" :class="t.priority==='重要' ? 'border-sakura bg-sakura-soft text-sakura-deep' : 'border-ink/10 bg-cream text-ink/50'">{{ t.priority || '一般' }}</span>
+              <span v-if="dueInfo(t)" class="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+                :class="dueInfo(t).tone==='late' ? 'bg-red-100 text-red-500' : dueInfo(t).tone==='soon' ? 'bg-orange-50 text-orange-500' : 'bg-sky-soft text-sky-deep'">⏰ {{ dueInfo(t).text }}</span>
+            </div>
+            <p v-if="t.note" class="mt-1 text-sm leading-snug text-ink/50">{{ t.note }}</p>
+          </div>
+          <div class="flex shrink-0 flex-col items-center">
+            <button @click="openTodo(t)" class="px-1 py-1.5 text-ink/40" aria-label="編輯"><ic name="dots" class="h-5 w-5"></ic></button>
+            <a v-if="t.link" :href="t.link" target="_blank" rel="noopener" class="px-1 py-1.5 text-sky-deep" aria-label="開啟連結"><ic name="link" class="h-[18px] w-[18px]"></ic></a>
+          </div>
+        </div>
+        <p v-if="!todoPending.length" class="py-8 text-center text-sm text-ink/40">{{ todoLeft ? '這個分類沒有待完成的項目' : '全部完成了 🎉' }}</p>
+      </div>
+
+      <div v-if="todoDone.length" class="space-y-3">
+        <h3 class="font-maru text-lg font-bold">已完成 <span class="text-sm font-normal text-ink/40">{{ todoDone.length }}</span></h3>
+        <div v-for="t in todoDone" :key="t.id" class="flex items-center gap-3 rounded-3xl border border-ink/10 bg-white/70 p-3 opacity-70">
+          <input type="checkbox" v-model="t.done" class="h-6 w-6 shrink-0 accent-sky-deep" aria-label="已完成">
+          <img :src="todoImg(todoCat(t))" alt="" class="h-10 w-10 shrink-0 select-none object-contain">
+          <div class="min-w-0 flex-1 font-medium leading-snug line-through">{{ t.name }}</div>
+          <button @click="openTodo(t)" class="shrink-0 px-1 py-2 text-ink/40" aria-label="編輯"><ic name="dots" class="h-5 w-5"></ic></button>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== Settings ===== -->
     <section v-show="tab==='settings'" class="space-y-4">
       <div>
@@ -495,7 +575,7 @@
   </main>
 
   <!-- FAB -->
-  <div v-if="tab!=='info' && tab!=='home' && tab!=='shop' && tab!=='settings'" class="pointer-events-none fixed inset-x-0 bottom-0 z-30">
+  <div v-if="tab!=='info' && tab!=='home' && tab!=='shop' && tab!=='todo' && tab!=='settings'" class="pointer-events-none fixed inset-x-0 bottom-0 z-30">
     <div class="relative mx-auto max-w-md">
       <button @click="fabAction" aria-label="新增"
         style="bottom: calc(84px + env(safe-area-inset-bottom))"
@@ -512,7 +592,7 @@
   <nav class="fixed inset-x-0 bottom-0 z-30" aria-label="主要導覽">
     <div class="mx-auto max-w-md rounded-t-[26px] border-t border-white/60 bg-white/85 px-2 pt-2 shadow-[0_-6px_24px_rgba(120,160,190,.25)] backdrop-blur-md"
          style="padding-bottom: calc(8px + env(safe-area-inset-bottom))">
-      <div class="grid grid-cols-6">
+      <div class="grid grid-cols-7">
         <button v-for="t in tabs" :key="t.id" @click="goTo(t.id)" :aria-label="t.label" :aria-current="tab===t.id ? 'page' : null"
           class="flex flex-col items-center gap-0.5 py-1 transition-colors" :class="tab===t.id ? 'text-sky-deep' : 'text-ink/45'">
           <span class="grid h-8 w-14 place-items-center rounded-full transition-all duration-300" :class="tab===t.id ? 'bg-sky-soft' : ''">
@@ -603,6 +683,43 @@
           <template v-else>
             <button v-if="sform.id" @click="confirmDel=true" class="btn-ghost text-sakura-deep">刪除</button>
             <button @click="saveShop" :disabled="!sform.name.trim()" class="btn flex-1 bg-sky-deep disabled:opacity-40">{{ sform.id ? '儲存' : '加入清單' }}</button>
+          </template>
+        </div>
+      </div>
+    </div>
+  </transition>
+
+  ﻿  <!-- ============ Modal: pre-trip to-do ============ -->
+  <transition name="sheet">
+    <div v-if="modal==='todo'" class="fixed inset-0 z-40 flex items-end justify-center bg-ink/40" @click.self="closeModal">
+      <div class="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-[28px] bg-white p-5 pb-8">
+        <div class="mb-4 flex items-center justify-between"><h3 class="font-maru text-lg font-bold">{{ tform.id ? '編輯事項' : '新增事項' }}</h3>
+          <button @click="closeModal" class="text-ink/40"><ic name="close" class="h-5 w-5"></ic></button></div>
+        <div class="space-y-3.5">
+          <div><label class="lbl">名稱</label><input v-model="tform.name" class="inp" placeholder="例：買新大衣 / 預約 teamLab 門票"></div>
+          <div><label class="lbl">分類</label>
+            <div class="flex flex-wrap gap-2">
+              <button v-for="c in todoCats" :key="c" @click="tform.category=c" class="rounded-full px-3 py-1.5 text-sm"
+                :class="tform.category===c ? 'bg-sky-deep text-white' : 'bg-cream'">{{ todoEmoji(c) }} {{ c }}</button>
+            </div></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="min-w-0"><label class="lbl">重要程度</label>
+              <div class="flex gap-2"><button v-for="p in ['一般','重要']" :key="p" @click="tform.priority=p" class="flex-1 rounded-xl py-2.5 text-sm"
+                :class="tform.priority===p ? (p==='重要' ? 'bg-sakura-deep text-white' : 'bg-sky-deep text-white') : 'bg-cream'">{{ p }}</button></div></div>
+            <div class="min-w-0"><label class="lbl">期限（選填）</label><input v-model="tform.due" type="date" class="inp"></div>
+          </div>
+          <div><label class="lbl">備註（選填）</label><textarea v-model="tform.note" rows="2" class="inp"></textarea></div>
+          <div v-if="tform.category==='門票'"><label class="lbl">購票連結（選填）</label><input v-model="tform.link" class="inp" placeholder="https://..." inputmode="url" autocapitalize="off"></div>
+        </div>
+        <div class="mt-6 flex gap-3">
+          <template v-if="tform.id && confirmDel">
+            <p class="flex-1 self-center text-sm text-sakura-deep">確定要刪除這個事項嗎？</p>
+            <button @click="confirmDel=false" class="btn-ghost">取消</button>
+            <button @click="deleteTodo" class="btn bg-sakura-deep">確認刪除</button>
+          </template>
+          <template v-else>
+            <button v-if="tform.id" @click="confirmDel=true" class="btn-ghost text-sakura-deep">刪除</button>
+            <button @click="saveTodo" :disabled="!tform.name.trim()" class="btn flex-1 bg-sky-deep disabled:opacity-40">{{ tform.id ? '儲存' : '加入清單' }}</button>
           </template>
         </div>
       </div>
