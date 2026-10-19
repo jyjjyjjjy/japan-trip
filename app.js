@@ -214,20 +214,13 @@ createApp({
     const shop = ref(saved.shop || []);
     const exps = ref(saved.exps || []);
     const budget = ref(saved.budget || { total: 3000 }); // MYR
-    // one-time migration of the old checklist into the to-do list (deterministic ids => synced devices never duplicate)
-    const todoSeed = saved.todos ? saved.todos : exampleTodos();
-    if (!saved.prepMigrated) {
-      const prep = saved.checklist && saved.checklist.length
-        ? saved.checklist.map(c => prepTodo(c, 'pre-' + c.id))
-        : defaultChecklist().map((c, i) => prepTodo(c, 'pre-d' + i));
-      const have = new Set(todoSeed.map(t => t.id));
-      prep.forEach(t => { if (!have.has(t.id)) todoSeed.push(t); });
-    }
-    const todos = ref(todoSeed);
+    const todos = ref(saved.todos ? saved.todos : exampleTodos());
+    // meta is synced too: prepSeeded=true means the old checklist has already been turned into 出發前準備 to-dos
+    const meta = ref(saved.meta || { prepSeeded: false });
     const flights = FLIGHTS, hotels = HOTELS;
 
-    watch([items, shop, exps, budget, todos], () => {
-      try { localStorage.setItem(KEY, JSON.stringify({ items: items.value, shop: shop.value, exps: exps.value, budget: budget.value, todos: todos.value, prepMigrated: true })); }
+    watch([items, shop, exps, budget, todos, meta], () => {
+      try { localStorage.setItem(KEY, JSON.stringify({ items: items.value, shop: shop.value, exps: exps.value, budget: budget.value, todos: todos.value, meta: meta.value, checklist: meta.value.prepSeeded ? undefined : saved.checklist })); }
       catch (e) { console.warn('storage full', e); }
     }, { deep: true });
 
@@ -331,15 +324,34 @@ createApp({
     const cfg = window.FIREBASE_CONFIG || {};
     const syncOn = !!(cfg.apiKey && window.firebase);
     const sync = reactive({ available: syncOn, code: localStorage.getItem('trip-code') || '', input: localStorage.getItem('trip-code') || '', status: syncOn ? '未連線' : '尚未設定 Firebase', ok: false });
-    const stores = { items, shop, exps, budget, todos };
+    const stores = { items, shop, exps, budget, todos, meta };
     const lastRemote = {};
     let fdb = null, unsubs = [], timers = {};
     const docOf = key => fdb.collection('trips').doc(sync.code).collection('data').doc(key);
     const clone = v => JSON.parse(JSON.stringify(v));
 
+    const firstSnap = {};
+    let prepBusy = false;
+    const seedPrep = async () => {
+      if (meta.value.prepSeeded || prepBusy) return;
+      const connected = !!(syncOn && sync.code && fdb);
+      if (connected && !(firstSnap.todos && firstSnap.meta)) return; // wait until the cloud copy has arrived, else it would overwrite the seed
+      prepBusy = true;
+      let list = saved.checklist && saved.checklist.length ? saved.checklist : null;
+      if (connected) { // prefer the checklist the cloud already holds, so ticks made on any device are kept
+        try { const d = await docOf('checklist').get(); if (d.exists && Array.isArray(d.data().data) && d.data().data.length) list = d.data().data; } catch {}
+      }
+      const prep = list ? list.map(c => prepTodo(c, 'pre-' + c.id)) : defaultChecklist().map((c, i) => prepTodo(c, 'pre-d' + i));
+      const have = new Set(todos.value.map(t => t.id));
+      prep.forEach(t => { if (!have.has(t.id)) todos.value.push(t); });
+      meta.value.prepSeeded = true;
+      prepBusy = false;
+    };
+
     const stopSync = () => { unsubs.forEach(u => u()); unsubs = []; sync.ok = false; };
     const startSync = () => {
       stopSync();
+      Object.keys(firstSnap).forEach(k => delete firstSnap[k]);
       if (!syncOn || !sync.code) { sync.status = syncOn ? '未連線' : sync.status; return; }
       if (!fdb) {
         firebase.initializeApp(cfg); fdb = firebase.firestore();
@@ -349,14 +361,17 @@ createApp({
       Object.keys(stores).forEach(key => {
         unsubs.push(docOf(key).onSnapshot(snap => {
           sync.ok = true; sync.status = '已同步 ✓';
-          if (snap.metadata.hasPendingWrites) return;
-          if (!snap.exists) { pushRemote(key); return; } // first device uploads its data
+          const seen = () => { firstSnap[key] = true; if (key === 'todos' || key === 'meta') seedPrep(); };
+          if (snap.metadata.hasPendingWrites) { seen(); return; }
+          if (!snap.exists) { pushRemote(key); seen(); return; } // first device uploads its data
           const remote = snap.data().data;
-          if (remote === undefined) return;
+          if (remote === undefined) { seen(); return; }
           const str = JSON.stringify(remote);
-          if (str === lastRemote[key]) return;
-          lastRemote[key] = str;
-          if (str !== JSON.stringify(stores[key].value)) stores[key].value = remote;
+          if (str !== lastRemote[key]) {
+            lastRemote[key] = str;
+            if (str !== JSON.stringify(stores[key].value)) stores[key].value = remote;
+          }
+          seen();
         }, err => { sync.ok = false; sync.status = '同步失敗：' + (err.code || err.message); }));
       });
     };
@@ -376,7 +391,7 @@ createApp({
       sync.code = c; sync.input = c; localStorage.setItem('trip-code', c); startSync();
     };
     const disconnectSync = () => { stopSync(); sync.code = ''; localStorage.removeItem('trip-code'); sync.status = '未連線'; };
-    onMounted(startSync);
+    onMounted(() => { startSync(); if (!syncOn || !sync.code) seedPrep(); });
 
     const wd = d => WD[new Date(d + 'T00:00:00').getDay()];
     const flightById = id => FLIGHTS.find(f => f.id === id);
