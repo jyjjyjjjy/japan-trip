@@ -92,8 +92,12 @@ const defaultChecklist = () => [
   { id: uid(), text: '行李打包', done: false },
 ];
 
-const TODO_CATS = ['食物', '衣服', '美容', '門票', '其它'];
-const defaultTodos = () => [
+const PREP_CAT = '出發前準備';
+const TODO_CATS = [PREP_CAT, '食物', '衣服', '美容', '門票', '其它'];
+const PREP_IMPORTANT = ['護照', 'Visit Japan Web 填寫', 'eSIM', '旅遊保險'];
+// the former "出發前檢查清單" items become to-dos of category 出發前準備
+const prepTodo = (c, id) => ({ id, name: c.text, category: PREP_CAT, priority: PREP_IMPORTANT.includes(c.text) ? '重要' : '一般', due: '', note: c.note || '', link: '', done: !!c.done });
+const exampleTodos = () => [
   { id: uid(), name: '帶給男朋友的本地食物', category: '食物', priority: '重要', due: '', note: '挑不易壞、可托運的；先確認日本入境可帶的食品', link: '', done: false },
   { id: uid(), name: '買旅行新衣服', category: '衣服', priority: '一般', due: '', note: '11 月底京阪早晚約 5–15°C，帶保暖層次', link: '', done: false },
   { id: uid(), name: '景點門票（待補清單）', category: '門票', priority: '重要', due: '', note: '先把要預訂的景點列出來，再逐項拆成待辦', link: '', done: false },
@@ -210,12 +214,20 @@ createApp({
     const shop = ref(saved.shop || []);
     const exps = ref(saved.exps || []);
     const budget = ref(saved.budget || { total: 3000 }); // MYR
-    const checklist = ref(saved.checklist || defaultChecklist());
-    const todos = ref(saved.todos || defaultTodos());
+    // one-time migration of the old checklist into the to-do list (deterministic ids => synced devices never duplicate)
+    const todoSeed = saved.todos ? saved.todos : exampleTodos();
+    if (!saved.prepMigrated) {
+      const prep = saved.checklist && saved.checklist.length
+        ? saved.checklist.map(c => prepTodo(c, 'pre-' + c.id))
+        : defaultChecklist().map((c, i) => prepTodo(c, 'pre-d' + i));
+      const have = new Set(todoSeed.map(t => t.id));
+      prep.forEach(t => { if (!have.has(t.id)) todoSeed.push(t); });
+    }
+    const todos = ref(todoSeed);
     const flights = FLIGHTS, hotels = HOTELS;
 
-    watch([items, shop, exps, budget, checklist, todos], () => {
-      try { localStorage.setItem(KEY, JSON.stringify({ items: items.value, shop: shop.value, exps: exps.value, budget: budget.value, checklist: checklist.value, todos: todos.value })); }
+    watch([items, shop, exps, budget, todos], () => {
+      try { localStorage.setItem(KEY, JSON.stringify({ items: items.value, shop: shop.value, exps: exps.value, budget: budget.value, todos: todos.value, prepMigrated: true })); }
       catch (e) { console.warn('storage full', e); }
     }, { deep: true });
 
@@ -319,7 +331,7 @@ createApp({
     const cfg = window.FIREBASE_CONFIG || {};
     const syncOn = !!(cfg.apiKey && window.firebase);
     const sync = reactive({ available: syncOn, code: localStorage.getItem('trip-code') || '', input: localStorage.getItem('trip-code') || '', status: syncOn ? '未連線' : '尚未設定 Firebase', ok: false });
-    const stores = { items, shop, exps, budget, checklist, todos };
+    const stores = { items, shop, exps, budget, todos };
     const lastRemote = {};
     let fdb = null, unsubs = [], timers = {};
     const docOf = key => fdb.collection('trips').doc(sync.code).collection('data').doc(key);
@@ -598,9 +610,9 @@ createApp({
       closeModal();
     };
     const deleteTodo = () => { todos.value = todos.value.filter(x => x.id !== tform.id); closeModal(); };
-    const todoEmoji = c => ({ 食物: '🍱', 衣服: '👕', 美容: '💄', 門票: '🎟️', 其它: '📌' }[c] || '📌');
+    const todoEmoji = c => ({ 出發前準備: '🧳', 食物: '🍱', 衣服: '👕', 美容: '💄', 門票: '🎟️', 其它: '📌' }[c] || '📌');
     const todoCat = t => t.category || '其它';
-    const todoImg = c => ({ 食物: 'cat-food.png', 衣服: 'cat-clothes.png', 美容: 'cat-beauty.png', 門票: 'cat-ticket.png', 其它: 'cat-other.png' }[c] || 'cat-other.png');
+    const todoImg = c => ({ 出發前準備: 'cat-prep.png', 食物: 'cat-food.png', 衣服: 'cat-clothes.png', 美容: 'cat-beauty.png', 門票: 'cat-ticket.png', 其它: 'cat-other.png' }[c] || 'cat-other.png');
     const todoFilter = ref('全部');
     const todoOnlyImportant = ref(false);
     const todoMatch = t => (todoFilter.value === '全部' || todoCat(t) === todoFilter.value) && (!todoOnlyImportant.value || t.priority === '重要');
@@ -659,13 +671,6 @@ createApp({
     });
     const editBudget = ref(false);
 
-    /* ----- checklist ----- */
-    const newCheck = ref('');
-    const doneCount = computed(() => checklist.value.filter(c => c.done).length);
-    const checkPct = computed(() => checklist.value.length ? doneCount.value / checklist.value.length * 100 : 0);
-    const addCheck = () => { const t = newCheck.value.trim(); if (!t) return; checklist.value.push({ id: uid(), text: t, done: false }); newCheck.value = ''; };
-    const removeCheck = c => { checklist.value = checklist.value.filter(x => x.id !== c.id); };
-
     /* ----- home: countdown card ----- */
     const countInfo = computed(() => {
       const n = new Date(), today = new Date(n.getFullYear(), n.getMonth(), n.getDate());
@@ -700,7 +705,7 @@ createApp({
       todoPending, todoDone, todoLeft, todoFinished, todoPct, todoCatCount, dueInfo, stickerFail,
       settings, customColor, themeColors, fxOptions, setTheme, fxCanvas,
       budget, editBudget, spentMyr, plannedJpy, plannedMyr, remaining, overBudget, budgetPct, expByCat, donut,
-      checklist, newCheck, doneCount, checkPct, addCheck, removeCheck, myr, onJpy, onMyr,
+      myr, onJpy, onMyr,
       countInfo, progress, nextFlight, shopDone, todayItems, goTo,
       tabs, tab, days, selectedDate, wd, dayItems, flights, hotels, flightById, catEmoji, catStyle, hasHours, expEmoji,
       travel, routeUrl, modes: Object.keys(MODE_ICON), navUrl, openNav, weather, placeOf, jpy, rate, fmt,
