@@ -660,9 +660,10 @@ createApp({
     const stickerFail = e => { e.target.style.display = 'none'; const s = e.target.nextElementSibling; if (s) s.style.display = 'block'; };
 
     /* ----- expenses ----- */
-    const eform = reactive({ id: null, category: '飲食', name: '', date: todayStr(), amount: null, pay: '現金', note: '' });
+    const blankExp = () => ({ id: null, category: '飲食', name: '', date: todayStr(), amount: null, cur: 'JPY', pay: '現金', note: '' });
+    const eform = reactive(blankExp());
     const openExp = e => {
-      Object.assign(eform, e ? { ...e } : { id: null, category: '飲食', name: '', date: todayStr(), amount: null, pay: '現金', note: '' });
+      Object.assign(eform, e ? { ...blankExp(), ...e } : blankExp()); // old entries have no cur => JPY
       confirmDel.value = false; modal.value = 'cost';
     };
     const saveExp = () => {
@@ -672,11 +673,16 @@ createApp({
       closeModal();
     };
     const deleteExp = () => { exps.value = exps.value.filter(x => x.id !== eform.id); closeModal(); };
-    const totalExp = computed(() => exps.value.reduce((s, e) => s + (+e.amount || 0), 0));
+    // each entry keeps the currency it was paid in (cur = 'JPY' | 'MYR'); totals are converted with the live rate
+    const toJpy = e => (e.cur === 'MYR' ? (+e.amount || 0) / rate.v : (+e.amount || 0));
+    const toMyr = e => (e.cur === 'MYR' ? (+e.amount || 0) : (+e.amount || 0) * rate.v);
+    const totalExp = computed(() => exps.value.reduce((s, e) => s + toJpy(e), 0));
+    const paidJpy = computed(() => exps.value.filter(e => e.cur !== 'MYR').reduce((s, e) => s + (+e.amount || 0), 0));
+    const paidMyr = computed(() => exps.value.filter(e => e.cur === 'MYR').reduce((s, e) => s + (+e.amount || 0), 0));
     const sortedExp = computed(() => [...exps.value].sort((a, b) => b.date.localeCompare(a.date)));
 
     /* ----- budget (MYR) ----- */
-    const spentMyr = computed(() => totalExp.value * rate.v);
+    const spentMyr = computed(() => exps.value.reduce((s, e) => s + toMyr(e), 0));
     const plannedJpy = computed(() => items.value.reduce((s, i) => s + (+i.cost || 0), 0));
     const plannedMyr = computed(() => plannedJpy.value * rate.v);
     const remaining = computed(() => (+budget.value.total || 0) - spentMyr.value);
@@ -685,7 +691,7 @@ createApp({
     const CAT_COLORS = ['#8FCDEB', '#F4B9C4', '#9DC18A', '#F5C26B', '#B7A6E0', '#C9C5BD'];
     const expByCat = computed(() => {
       const total = totalExp.value;
-      return EXP_CATS.map((c, i) => ({ c, color: CAT_COLORS[i], jpy: exps.value.filter(e => e.category === c).reduce((s, e) => s + (+e.amount || 0), 0) }))
+      return EXP_CATS.map((c, i) => ({ c, color: CAT_COLORS[i], jpy: exps.value.filter(e => e.category === c).reduce((s, e) => s + toJpy(e), 0) }))
         .filter(x => x.jpy > 0).map(x => ({ ...x, pct: total ? x.jpy / total * 100 : 0 }));
     });
     const donut = computed(() => {
@@ -736,7 +742,7 @@ createApp({
       modal, form, cats: CATS, confirmDel, saving, openEdit, closeModal, saveItem, deleteItem,
       listEl, dateStrip, shop, sform, onPhoto, saveShop, deleteShop, openShop, shopCats: ['零食', '護膚品', '護髮品', '衣服', '鞋子', '其它'],
       shopEmoji, shopCat, shopFilter, onlyImportant, shopTodo, shopBought, todoCount, boughtCount, catCount,
-      exps, eform, expCats: EXP_CATS, openExp, saveExp, deleteExp, totalExp, sortedExp, fabAction, resetAll,
+      exps, eform, expCats: EXP_CATS, openExp, saveExp, deleteExp, totalExp, paidJpy, paidMyr, toJpy, toMyr, sortedExp, fabAction, resetAll,
     };
   },
 }).mount('#app');

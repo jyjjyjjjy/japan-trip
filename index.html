@@ -499,6 +499,7 @@
             <div class="text-xs opacity-80">總花費</div>
             <div class="font-maru text-4xl font-bold">¥ {{ fmt(totalExp,0) }}</div>
             <div class="mt-1 text-xs opacity-80">≈ RM {{ fmt(spentMyr,2) }}</div>
+            <div v-if="paidJpy && paidMyr" class="mt-0.5 text-[11px] opacity-70">其中：日幣 ¥{{ fmt(paidJpy,0) }} ＋ 馬幣 RM {{ fmt(paidMyr,2) }}</div>
           </div>
           <button @click="editBudget=!editBudget" class="rounded-full bg-white/25 px-3 py-1 text-xs">{{ editBudget ? '完成' : '調整預算' }}</button>
         </div>
@@ -546,7 +547,7 @@
             <div class="truncate font-bold">{{ e.name }}</div>
             <div class="text-[11px] text-ink/45">{{ e.date }} · {{ e.category }} · {{ e.pay }}<span v-if="e.note"> · {{ e.note }}</span></div>
           </div>
-          <div class="font-maru font-bold">¥{{ fmt(e.amount,0) }}</div>
+          <div class="shrink-0 text-right"><div class="font-maru font-bold">{{ e.cur==='MYR' ? 'RM ' + fmt(e.amount,2) : '¥' + fmt(e.amount,0) }}</div><div class="text-[11px] text-ink/40">≈ {{ e.cur==='MYR' ? '¥' + fmt(toJpy(e),0) : 'RM ' + fmt(toMyr(e),2) }}</div></div>
         </div>
       </div>
       <p v-if="!exps.length" class="py-12 text-center text-sm text-ink/40">還沒有花費記錄<br>點右下角 ＋ 新增</p>
@@ -718,9 +719,12 @@
                 :class="eform.category===c ? 'bg-sky-deep text-white' : 'bg-cream'">{{ expEmoji(c) }} {{ c }}</button>
             </div></div>
           <div><label class="lbl">名稱</label><input v-model="eform.name" class="inp"></div>
+          <div><label class="lbl">幣別</label>
+            <div class="flex gap-2"><button v-for="c in [{k:'JPY',t:'日幣 ¥'},{k:'MYR',t:'馬幣 RM'}]" :key="c.k" @click="eform.cur=c.k" class="flex-1 rounded-xl py-2.5 text-sm"
+              :class="eform.cur===c.k ? 'bg-sky-deep text-white' : 'bg-cream'">{{ c.t }}</button></div></div>
           <div class="grid grid-cols-2 gap-3">
             <div class="min-w-0"><label class="lbl">日期</label><input v-model="eform.date" type="date" class="inp"></div>
-            <div class="min-w-0"><label class="lbl">金額（日幣）</label><input v-model.number="eform.amount" type="number" inputmode="decimal" class="inp"></div>
+            <div class="min-w-0"><label class="lbl">金額（{{ eform.cur==='MYR' ? '馬幣' : '日幣' }}）</label><input v-model.number="eform.amount" type="number" inputmode="decimal" class="inp"></div>
           </div>
           <div><label class="lbl">付款方式</label>
             <div class="flex gap-2"><button v-for="p in ['現金','信用卡']" :key="p" @click="eform.pay=p" class="flex-1 rounded-xl py-2.5 text-sm"
