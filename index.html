@@ -140,7 +140,7 @@
       <div :key="selectedDate" ref="listEl" class="space-y-0">
         <div v-for="(it,i) in dayItems" :key="it.id" :data-id="it.id" class="plan-item">
           <!-- travel connector -->
-          <div v-if="it.category!=='航班' && !it.noTravel" class="flex items-center gap-2 py-2 pl-5 pr-1 text-[12px] text-ink/50">
+          <div v-if="showConnector(it,i)" class="flex items-center gap-2 py-2 pl-5 pr-1 text-[12px] text-ink/50">
             <span class="h-5 w-px shrink-0 bg-sky/60"></span>
             <template v-if="travel(it,i)">
               <span class="text-base leading-none">{{ travel(it,i).icon }}</span>
@@ -613,6 +613,9 @@
             </div>
             <div><label class="lbl">路線說明</label><input v-model="form.travelNote" class="inp" placeholder="例：JR 環狀線 → 夢咲線，西九條轉乘"></div>
           </div>
+          <label v-if="form.category!=='航班'" class="flex items-center gap-2 text-sm text-ink/70">
+            <input type="checkbox" v-model="form.noTravel" class="h-4 w-4 accent-sky-deep">與上一站同一地點（不顯示交通時間與查路線）
+          </label>
           <div><label class="lbl">特色 &amp; 備註</label><textarea v-model="form.note" rows="3" class="inp"></textarea></div>
         </div>
         <div class="mt-6 flex gap-3">

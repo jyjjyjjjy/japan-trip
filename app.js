@@ -444,6 +444,16 @@ createApp({
       return { icon: '🚇', text: fmtMin(Math.round(12 + d / 30 * 60)), from: o.name };
     };
 
+    // The travel row (time + "查路線") is hidden only for cards flagged noTravel that really sit at the same spot as the previous stop
+    // (e.g. rides inside USJ, hotel check-out). A flagged card whose place was changed gets its row back automatically.
+    const showConnector = (it, idx) => {
+      if (it.category === '航班') return false;
+      if (!it.noTravel) return true;
+      if (it.lat == null) return true;
+      const o = originOf(it, idx);
+      return !!o && haversine(o, it) >= 0.3;
+    };
+
     /* ----- navigation ----- */
     const navUrl = ({ q, lat, lng }) => {
       const dest = lat != null ? `${lat},${lng}` : q;
@@ -524,7 +534,7 @@ createApp({
     const modal = ref(null);
     const confirmDel = ref(false);
     const saving = ref(false);
-    const blank = () => ({ id: null, date: selectedDate.value, category: '景點', name: '', address: '', hours: '', ticket: '', note: '', time: '', cost: null, lat: null, lng: null, travelMode: '', travelMin: null, travelNote: '' });
+    const blank = () => ({ id: null, date: selectedDate.value, category: '景點', name: '', address: '', hours: '', ticket: '', note: '', time: '', cost: null, lat: null, lng: null, noTravel: false, travelMode: '', travelMin: null, travelNote: '' });
     const form = reactive(blank());
     const openAdd = () => { Object.assign(form, blank()); confirmDel.value = false; modal.value = 'plan'; };
     const openEdit = it => { Object.assign(form, blank(), JSON.parse(JSON.stringify(it))); confirmDel.value = false; modal.value = 'plan'; };
@@ -543,6 +553,7 @@ createApp({
       const old = data.id ? items.value.find(i => i.id === data.id) : null;
       const q = (data.address || data.name).trim();
       const changed = !old || (old.address || old.name) !== q;
+      if (changed && old && old.noTravel && data.noTravel) data.noTravel = false; // place changed => it is no longer "same spot"
       if (changed && !data.flightId) {
         saving.value = true;
         const g = await geocode(q);
@@ -738,7 +749,7 @@ createApp({
       myr, onJpy, onMyr,
       countInfo, progress, nextFlight, shopDone, todayItems, goTo,
       tabs, tab, days, selectedDate, wd, dayItems, flights, hotels, flightById, catEmoji, catStyle, hasHours, expEmoji,
-      travel, routeUrl, modes: Object.keys(MODE_ICON), navUrl, openNav, weather, placeOf, jpy, rate, fmt,
+      travel, routeUrl, showConnector, modes: Object.keys(MODE_ICON), navUrl, openNav, weather, placeOf, jpy, rate, fmt,
       modal, form, cats: CATS, confirmDel, saving, openEdit, closeModal, saveItem, deleteItem,
       listEl, dateStrip, shop, sform, onPhoto, saveShop, deleteShop, openShop, shopCats: ['零食', '護膚品', '護髮品', '衣服', '鞋子', '其它'],
       shopEmoji, shopCat, shopFilter, onlyImportant, shopTodo, shopBought, todoCount, boughtCount, catCount,
