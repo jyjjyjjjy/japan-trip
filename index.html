@@ -136,6 +136,15 @@
         </div>
       </div>
 
+      <!-- alternative plans for a day (e.g. boat ticket available or not) -->
+      <div v-if="dayVariants.length" class="mb-4 rounded-2xl bg-white p-2 shadow-sm">
+        <div class="px-2 pb-1 pt-0.5 text-[11px] text-ink/45">這天有兩種走法，依現場狀況切換：</div>
+        <div class="grid grid-cols-2 gap-2">
+          <button v-for="v in dayVariants" :key="v" @click="variantPick[selectedDate]=v" class="rounded-xl px-3 py-2.5 text-sm font-medium transition"
+            :class="activeVariant===v ? 'bg-sky-deep text-white' : 'bg-cream text-ink/60'">{{ variantLabel[v] || ('方案 ' + v) }}</button>
+        </div>
+      </div>
+
       <!-- list -->
       <div :key="selectedDate" ref="listEl" class="space-y-0">
         <div v-for="(it,i) in dayItems" :key="it.id" :data-id="it.id" class="plan-item">
@@ -218,6 +227,32 @@
         <div class="space-y-3"><flight-card v-for="f in flights.filter(x=>x.dir==='out')" :key="f.id" :f="f"></flight-card></div>
         <p class="mb-2 mt-5 text-xs text-ink/50">回程</p>
         <div class="space-y-3"><flight-card v-for="f in flights.filter(x=>x.dir==='in')" :key="f.id" :f="f"></flight-card></div>
+      </div>
+
+      <div>
+        <h2 class="sec-title">夜行巴士 <span class="text-[11px] font-normal text-ink/40">男朋友</span></h2>
+        <div v-for="b in buses" :key="b.id" class="rounded-2xl bg-white shadow-sm">
+          <div class="flex items-center justify-between rounded-t-2xl bg-gradient-to-r from-sky to-sky-deep px-4 py-2 text-white">
+            <span class="text-xs font-medium tracking-wide">🚌 高速夜行巴士</span>
+            <span class="text-xs">{{ busDay(b.date) }}</span>
+          </div>
+          <div class="px-4 pb-4 pt-3">
+            <div class="flex items-center justify-between">
+              <div><div class="font-maru text-2xl font-bold">{{ b.fromZh }}</div><div class="text-[11px] text-ink/45">{{ b.from }}</div></div>
+              <div class="flex flex-1 flex-col items-center px-3">
+                <div class="text-[11px] text-ink/45">{{ b.dur }}</div>
+                <div class="my-1 flex w-full items-center text-sky-deep"><span class="h-px flex-1 border-t border-dashed border-sky"></span><span class="mx-1 text-lg leading-none">🚌</span><span class="h-px flex-1 border-t border-dashed border-sky"></span></div>
+                <div class="text-[11px] font-medium text-sky-deep">夜行</div>
+              </div>
+              <div class="text-right"><div class="font-maru text-2xl font-bold">{{ b.toZh }}</div><div class="text-[11px] text-ink/45">{{ b.to }}</div></div>
+            </div>
+            <div class="mt-3 flex justify-between border-t border-dashed border-ink/15 pt-3 text-sm">
+              <div><div class="text-[11px] text-ink/45">出發</div><div class="font-bold">{{ b.dep }}</div><div class="text-[11px] text-ink/40">{{ busDay(b.date) }}</div></div>
+              <div class="text-center"><div class="text-[11px] text-ink/45">行車時間</div><div class="font-bold">{{ b.dur }}</div></div>
+              <div class="text-right"><div class="text-[11px] text-ink/45">抵達</div><div class="font-bold">{{ b.arr }}</div><div class="text-[11px] text-ink/40">{{ busDay(b.arrDate) }}</div></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div>
@@ -613,6 +648,8 @@
             </div>
             <div><label class="lbl">路線說明</label><input v-model="form.travelNote" class="inp" placeholder="例：JR 環狀線 → 夢咲線，西九條轉乘"></div>
           </div>
+          <div v-if="dayVariants.length"><label class="lbl">所屬方案</label>
+            <select v-model="form.variant" class="inp"><option value="">兩個方案都顯示</option><option v-for="v in dayVariants" :key="v" :value="v">{{ variantLabel[v] || v }}</option></select></div>
           <label v-if="form.category!=='航班'" class="flex items-center gap-2 text-sm text-ink/70">
             <input type="checkbox" v-model="form.noTravel" class="h-4 w-4 accent-sky-deep">與上一站同一地點（不顯示交通時間與查路線）
           </label>

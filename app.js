@@ -12,6 +12,11 @@ const FLIGHTS = [
   { id: 'f4', dir: 'in',  airline: 'Vietnam Airlines', date: '2026-11-29', no: 'VN681', from: 'HAN', fromCity: 'Hanoi', to: 'KUL', toCity: 'Kuala Lumpur', dep: '14:50', arr: '19:10', dur: '3h 20m', arrNote: '' },
 ];
 
+// overnight highway bus taken by the boyfriend (already in Japan): Tokyo -> Osaka
+const BUSES = [
+  { id: 'b1', who: '男朋友', from: 'Ikebukuro', fromZh: '池袋', to: 'Namba', toZh: '難波', date: '2026-11-21', dep: '23:00', arrDate: '2026-11-22', arr: '07:50', dur: '8h 50m' },
+];
+
 const HOTELS = [
   { city: 'Kyoto', name: 'Daiya Ryokan', dates: '22 – 24 Nov（2 晚）', from: '2026-11-22', to: '2026-11-24',
     address: '〒600-8148 京都府京都市下京区飴屋町292', phone: '', lat: 34.9877, lng: 135.7587 },
@@ -45,26 +50,40 @@ const defaultItems = () => [
   { id: uid(), date: '2026-11-22', category: '景點', name: '東福寺', time: '14:45', address: 'Tofuku-ji, Kyoto', lat: 34.9768, lng: 135.7740, hours: '紅葉季約 08:30 – 16:30（最後入場約 16:00）', ticket: '通天橋 紅葉季約 ¥1,000（以官網為準）', note: '稻荷站搭 JR 奈良線 1 站。通天橋紅葉是重點；建議 15:00 前入場，留足 1–1.5 小時。' },
   { id: uid(), date: '2026-11-22', category: '住宿', name: 'Daiya Ryokan 入住・休息', time: '16:30', address: 'Daiya Ryokan Kyoto', lat: 34.9877, lng: 135.7587, hours: 'Check-in 15:00', note: '回旅館入住、洗澡休息，補眠。' },
   { id: uid(), date: '2026-11-22', category: '美食', name: '晚餐（待定）', time: '18:00', note: '午餐吃得比較晚，晚餐吃輕一點，旅館附近簡單吃就好；請在 21:30 前睡覺（23 日 05:15 起床）。' },
-  { id: uid(), date: '2026-11-23', category: '景點', name: '清水寺（清晨）', time: '06:00', address: 'Kiyomizu-dera, Kyoto', lat: 34.9949, lng: 135.7850, travelMode: '計程車', travelMin: 15, travelNote: '估算：05:30 左右從旅館搭計程車；或搭京阪到清水五條再走上坡約 25 分。請用 Google Maps 查首班車', hours: '約 06:00 開門（請以官網為準）', ticket: '約 ¥500', note: '開門就到，避開假日人潮。日出約 06:30 前後，天色還暗要小心路滑。' },
-  { id: uid(), date: '2026-11-23', category: '景點', name: '二年坂・產寧坂（清晨無人街景）', time: '07:00', address: 'Sannenzaka, Kyoto', lat: 34.9979, lng: 135.7800, hours: '商店約 10:00 才開，清晨最空', ticket: '免費', note: '清水寺下坡順路拍照，這時人最少。' },
-  { id: uid(), date: '2026-11-23', category: '景點', name: '八坂神社・花見小路', time: '07:45', address: 'Yasaka Shrine, Kyoto', lat: 35.0036, lng: 135.7785, hours: '神社境內 24 小時', ticket: '免費', note: '清晨的祇園很安靜，適合拍照。' },
-  { id: uid(), date: '2026-11-23', category: '美食', name: '早餐（待定）', time: '08:30', note: '祇園或東山一帶的咖啡店／早餐店，先查開門時間。' },
-  { id: uid(), date: '2026-11-23', category: '景點', name: '永觀堂', time: '09:00', address: 'Eikando Zenrinji, Kyoto', lat: 35.0053, lng: 135.7947, travelMode: '巴士', travelMin: 15, travelNote: '估算：祇園搭市巴士約 15 分，或步行約 30 分；請用 Google Maps 查', hours: '約 09:00 – 17:00（紅葉季可能有夜間特別拜觀）', ticket: '約 ¥1,000（以官網為準）', note: '京都紅葉名所。今天是假日連休，開門就入場可避開人潮。' },
-  { id: uid(), date: '2026-11-23', category: '景點', name: '南禪寺', time: '10:30', address: 'Nanzen-ji, Kyoto', lat: 35.0113, lng: 135.7940, hours: '約 08:40 – 16:40', ticket: '境內免費；方丈庭園、三門各約 ¥600', note: '水路閣紅磚拱橋配紅葉很上相，可只逛境內免費區域。' },
-  { id: uid(), date: '2026-11-23', category: '美食', name: '哲學之道散步・午餐', time: '12:00', address: 'Philosophers Path, Kyoto', lat: 35.0190, lng: 135.7950, hours: '店家各異', note: '從南禪寺沿著哲學之道散步，找一家喜歡的店午餐。' },
-  { id: uid(), date: '2026-11-23', category: '住宿', name: '回旅館休息', time: '14:00', address: 'Daiya Ryokan Kyoto', lat: 34.9877, lng: 135.7587, note: '下午補眠或自由逛，不要排太滿。' },
-  { id: uid(), date: '2026-11-23', category: '美食', name: '晚餐（待定）', time: '18:00', note: '錦市場／先斗町一帶，或旅館附近。明天 08:30 退房、09:10 要搭 JR，今晚請早點睡。' },
-  { id: uid(), date: '2026-11-24', category: '住宿', name: '退房 Daiya Ryokan（寄放行李）', time: '07:15', address: 'Daiya Ryokan Kyoto', lat: 34.9877, lng: 135.7587, noTravel: true, hours: 'Check-out 07:15（需向旅館確認能否提早退房）', note: '行李寄放在旅館，下午 14:45 前後回來取。請提前聯絡旅館：能否提早退房、行李可放到幾點。' },
-  { id: uid(), date: '2026-11-24', category: '景點', name: '竹林小徑（早上人少）', time: '08:10', address: 'Arashiyama Bamboo Forest, Kyoto', lat: 35.0170, lng: 135.6713, travelMode: '電車', travelMin: 50, travelNote: '估算：07:20 從旅館出發，步行約 10–12 分到京都站，搭 JR 嵯峨野線到嵯峨嵐山站約 17 分，再步行約 10 分到竹林。請用 Google Maps 查實際班次', hours: '24 小時開放', ticket: '免費', note: '從南邊入口往北走，早上 08:00 前後人最少。小火車與保津川遊船已售罄，改走這條備案路線。' },
-  { id: uid(), date: '2026-11-24', category: '景點', name: '常寂光寺', time: '09:00', address: 'Jojakkoji, Kyoto', lat: 35.0197, lng: 135.6642, hours: '約 09:00 – 17:00（開門就到）', ticket: '約 ¥500', note: '嵐山賞楓名所，朱紅色多寶塔，坡道較多。' },
-  { id: uid(), date: '2026-11-24', category: '景點', name: '祇王寺', time: '09:45', address: 'Gio-ji, Kyoto', lat: 35.0235, lng: 135.6668, hours: '約 09:00 – 17:00', ticket: '約 ¥300（請查官網）', note: '青苔配紅葉，草頂佛堂。' },
-  { id: uid(), date: '2026-11-24', category: '景點', name: '天龍寺（曹源池庭園）', time: '10:30', address: 'Tenryu-ji, Kyoto', lat: 35.0158, lng: 135.6738, hours: '約 08:30 – 17:00', ticket: '庭園 約 ¥500', note: '曹源池庭園借景嵐山，紅葉很美。從祇王寺往南走回來，不用走回頭路。' },
-  { id: uid(), date: '2026-11-24', category: '美食', name: '天龍寺 精進料理「篩月」午餐', time: '11:30', address: 'Tenryu-ji Shigetsu, Kyoto', lat: 35.0158, lng: 135.6738, noTravel: true, hours: '午餐約 11:00–14:00，下午 2 點停止營業（請查官網／是否需要預約）', note: '11:00 開門，建議 11:30 前入座，避免客滿或來不及。' },
-  { id: uid(), date: '2026-11-24', category: '景點', name: '渡月橋', time: '13:00', address: 'Togetsukyo Bridge, Kyoto', lat: 35.0094, lng: 135.6779, hours: '24 小時', ticket: '免費', note: '嵐山地標。想體驗的話可以在橋下划船（現場買票，我沒查價格與時間）。' },
-  { id: uid(), date: '2026-11-24', category: '住宿', name: '回旅館取行李', time: '14:45', address: 'Daiya Ryokan Kyoto', lat: 34.9877, lng: 135.7587, travelMode: '電車', travelMin: 45, travelNote: '估算：約 14:00 離開渡月橋，步行到 JR 嵯峨嵐山站約 15 分 + JR 到京都站約 17 分 + 步行到旅館約 12 分；請用 Google Maps 確認', note: '取回行李。' },
-  { id: uid(), date: '2026-11-24', category: '住宿', name: 'Ebisu 804 入住', time: '16:30', address: 'Ebisuhonmachi Naniwa Osaka', lat: 34.6537, lng: 135.5013, hours: 'Check-in 時間請向房東確認', travelMode: '電車', travelMin: 85, travelNote: '估算：約 15:15 從旅館出發，步行到京都站 → JR 京都線到大阪 → 環狀線到新今宮 → 步行；請用 Google Maps 查實際班次', note: '先放行李，請提前聯絡房東能否 16:30 左右入住或寄放。明天要 USJ，晚上早點休息。' },
-  { id: uid(), date: '2026-11-24', category: '景點', name: '新世界・通天閣（選擇性）', time: '17:30', address: 'Tsutenkaku, Osaka', lat: 34.6525, lng: 135.5063, hours: '展望台約 10:00 – 19:00（請查官網）', ticket: '展望台約 ¥1,000', note: '離住處步行可到，趁天黑前看夕陽；累了可以直接去吃晚餐。' },
-  { id: uid(), date: '2026-11-24', category: '美食', name: '新世界晚餐（串炸）', time: '18:30', address: 'Shinsekai, Osaka', lat: 34.6523, lng: 135.5058, hours: '店家各異', note: '21:00 前回住處，25 日 06:15 就要出發去 USJ。' },
+  { id: uid(), date: '2026-11-23', category: '景點', name: '清水寺（清晨拍照）', time: '06:00', address: 'Kiyomizu-dera, Kyoto', lat: 34.9949, lng: 135.7850, travelMode: '計程車', travelMin: 15, travelNote: '估算：05:30 左右從旅館搭計程車；或搭京阪到清水五條再走上坡約 25 分。請用 Google Maps 查首班車', hours: '約 06:00 開門（請以官網為準）', ticket: '約 ¥500', note: '06:00 抵達拍照，日出約 06:30 前後，天還暗小心路滑。最晚 06:40 離開，07:00 要到一期和服。' },
+  { id: uid(), date: '2026-11-23', category: '其他', name: '一期和服：穿戴和服（已預約）', time: '07:00', address: '一期和服 京都', travelMode: '步行', travelMin: 15, travelNote: '估算：清水寺 → 和服店，請依店家實際地址用 Google Maps 確認（編輯此卡片填入地址即可自動定位）', hours: '07:00 預約穿戴', note: '穿戴約 45–60 分。向店家確認：歸還截止時間 15:00、可否寄放原本衣物與行李、天冷是否提供披肩或外套。' },
+  { id: uid(), date: '2026-11-23', category: '美食', name: '早餐・整理（待定）', time: '08:15', note: '穿好和服後在店附近簡單吃早餐，9:15 前移動到攝影師集合點。' },
+  { id: uid(), date: '2026-11-23', category: '其他', name: '攝影師拍攝（已預約）', time: '09:30', hours: '09:30 集合', note: '請向攝影師確認集合地點（填入地址可自動定位）、拍攝時長與成片交付方式。' },
+  { id: uid(), date: '2026-11-23', category: '景點', name: '二年坂・產寧坂（和服散步）', time: '11:00', address: 'Sannenzaka, Kyoto', lat: 34.9979, lng: 135.7800, hours: '商店約 10:00 開', ticket: '免費', note: '穿和服走石板坡道要慢，鞋底小心。' },
+  { id: uid(), date: '2026-11-23', category: '美食', name: '午餐（待定）', time: '11:45', note: '清水寺、二年坂一帶找一家，穿和服用餐盡量選有座位的店。' },
+  { id: uid(), date: '2026-11-23', category: '景點', name: '八坂神社・花見小路（和服散步）', time: '12:45', address: 'Yasaka Shrine, Kyoto', lat: 35.0036, lng: 135.7785, hours: '神社境內 24 小時', ticket: '免費', note: '祇園的石板路拍照很好看。13:45 前開始往和服店方向走。' },
+  { id: uid(), date: '2026-11-23', category: '其他', name: '換回衣服・歸還和服（15:00 前）', time: '14:00', address: '一期和服 京都', note: '最晚 15:00 前歸還，更衣約 20–30 分，建議 14:00 就到店，不要卡時間。' },
+  { id: uid(), date: '2026-11-23', category: '住宿', name: '回旅館休息', time: '15:30', address: 'Daiya Ryokan Kyoto', lat: 34.9877, lng: 135.7587, note: '起得早，下午補眠。' },
+  { id: uid(), date: '2026-11-23', category: '美食', name: '晚餐（待定）', time: '18:00', note: '錦市場／先斗町一帶，或旅館附近。明天 07:15 要退房，今晚請早點睡。' },
+  { id: uid(), date: "2026-11-24", category: "住宿", name: "退房 Daiya Ryokan（寄放行李）", time: "07:00", address: "Daiya Ryokan Kyoto", lat: 34.9877, lng: 135.7587, noTravel: true, hours: "Check-out 07:00（比原本早 15 分，才趕得上 08:30 前買船票；建議前一晚先結帳）", note: "行李寄放在旅館，傍晚回來取。請提前聯絡旅館：能否 07:00 退房、行李可放到幾點。" },
+  { id: uid(), date: "2026-11-24", category: "景點", name: "保津川下り 乗船場（先看當日船票）", time: "08:15", address: "〒621-0005 京都府亀岡市保津町下中島２", lat: 35.0174, lng: 135.5866, travelMode: "電車", travelMin: 70, travelNote: "估算：07:05 從旅館出發，步行約 12 分到京都站，搭 JR 山陰線（嵯峨野線）到龜岡站約 40 分，再步行到乘船處約 10 分；請用 Google Maps 查班次，目標 08:15 前抵達", hours: "08:00 – 08:30（售票）", ticket: "當日券（現場購買）", note: "*最好 8:30 之前到買當日券，遲了會買不到\n*當天看官方網站可以知道當天有沒有開船\nhttps://www.hozugawakudari.jp/emergency/43635\n\n【決定方式】有 09:30 前出發的船 → 上方切換「方案 A」；沒有或太晚 → 切換「方案 B」，搭 JR 回嵯峨嵐山走備案路線。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "A", name: "搭乘保津川下り（約 2 小時）", time: "09:00", address: "〒621-0005 京都府亀岡市保津町下中島２", lat: 35.0174, lng: 135.5866, noTravel: true, hours: "約 2 小時（以官網為準）", note: "以現場買到的班次為準；若出發晚於 09:30，建議改方案 B。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "A", name: "保津川下り 着船場【乗り場ではありません!】", time: "11:15", address: "〒616-8386 京都府京都市右京区嵯峨亀ノ尾町１３−６１６", travelMode: "遊船", travelMin: 120, travelNote: "估算：乘船約 2 小時，依實際班次調整", note: "下船的地方" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "A", name: "渡月橋", time: "11:30", address: "Togetsukyo Bridge, Kyoto", lat: 35.0094, lng: 135.6779, travelMode: "步行", travelMin: 10, travelNote: "估算：從著船場步行到渡月橋約 10 分", hours: "24 小時", ticket: "免費", note: "嵐山地標，往天龍寺步行很近。" },
+  { id: uid(), date: "2026-11-24", category: "美食", variant: "A", name: "午餐（篩月 或 渡月橋周邊）", time: "12:00", address: "Tenryu-ji Shigetsu, Kyoto", lat: 35.0158, lng: 135.6738, hours: "篩月午餐約 11:00–14:00，下午 2 點停止營業（請查官網／是否需要預約）", note: "船晚到的話可以改在渡月橋周邊吃。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "A", name: "天龍寺（曹源池庭園）", time: "13:00", address: "Tenryu-ji, Kyoto", lat: 35.0158, lng: 135.6738, hours: "約 08:30 – 17:00", ticket: "庭園 約 ¥500", note: "曹源池庭園借景嵐山，紅葉很美。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "A", name: "竹林小徑", time: "14:00", address: "Arashiyama Bamboo Forest, Kyoto", lat: 35.017, lng: 135.6713, hours: "24 小時開放", ticket: "免費", note: "下午人比較多，慢慢走；從天龍寺北門直通。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "A", name: "常寂光寺", time: "14:30", address: "Jojakkoji, Kyoto", lat: 35.0197, lng: 135.6642, hours: "約 09:00 – 17:00", ticket: "約 ¥500", note: "嵐山賞楓名所，朱紅色多寶塔，坡道較多。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "A", name: "祇王寺（選擇性）", time: "15:15", address: "Gio-ji, Kyoto", lat: 35.0235, lng: 135.6668, hours: "約 09:00 – 17:00", ticket: "約 ¥300（請查官網）", note: "時間不夠就砍掉；15:45 前一定要開始往 JR 嵯峨嵐山站走。" },
+  { id: uid(), date: "2026-11-24", category: "住宿", variant: "A", name: "回旅館取行李", time: "16:30", address: "Daiya Ryokan Kyoto", lat: 34.9877, lng: 135.7587, travelMode: "電車", travelMin: 50, travelNote: "估算：步行到 JR 嵯峨嵐山站約 20 分 + JR 到京都站約 17 分 + 步行到旅館約 12 分；請用 Google Maps 確認", note: "取回行李。" },
+  { id: uid(), date: "2026-11-24", category: "住宿", variant: "A", name: "Ebisu 804 入住", time: "18:00", address: "Ebisuhonmachi Naniwa Osaka", lat: 34.6537, lng: 135.5013, travelMode: "電車", travelMin: 85, travelNote: "估算：約 15–20 分後從旅館出發，步行到京都站 → JR 京都線到大阪 → 環狀線到新今宮 → 步行；請用 Google Maps 查實際班次", hours: "Check-in 時間請向房東確認", note: "先放行李，請提前聯絡房東能否 18:00 左右入住。明天 USJ 06:15 就要出發，今晚請早點休息。" },
+  { id: uid(), date: "2026-11-24", category: "美食", variant: "A", name: "新世界晚餐（串炸）", time: "19:30", address: "Shinsekai, Osaka", lat: 34.6523, lng: 135.5058, hours: "店家各異", note: "累了就簡單吃，21:00 前回住處。" },
+  { id: uid(), date: "2026-11-24", category: "其它", variant: "B", name: "龜岡 → 嵯峨嵐山站（改走備案）", time: "08:45", address: "Saga-Arashiyama Station, Kyoto", travelMode: "電車", travelMin: 30, travelNote: "估算：龜岡站步行約 10 分 + JR 約 15–20 分；請用 Google Maps 查班次", note: "沒買到合適的船票就改走這條，起點改在嵯峨嵐山站。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "B", name: "竹林小徑", time: "09:15", address: "Arashiyama Bamboo Forest, Kyoto", lat: 35.017, lng: 135.6713, travelMode: "步行", travelMin: 10, travelNote: "估算：嵯峨嵐山站步行約 10 分", hours: "24 小時開放", ticket: "免費", note: "從南邊入口往北走，人還不多。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "B", name: "常寂光寺", time: "10:00", address: "Jojakkoji, Kyoto", lat: 35.0197, lng: 135.6642, hours: "約 09:00 – 17:00（開門就到）", ticket: "約 ¥500", note: "嵐山賞楓名所，朱紅色多寶塔，坡道較多。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "B", name: "祇王寺", time: "10:45", address: "Gio-ji, Kyoto", lat: 35.0235, lng: 135.6668, hours: "約 09:00 – 17:00", ticket: "約 ¥300（請查官網）", note: "青苔配紅葉，草頂佛堂。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "B", name: "天龍寺（曹源池庭園）", time: "11:30", address: "Tenryu-ji, Kyoto", lat: 35.0158, lng: 135.6738, hours: "約 08:30 – 17:00", ticket: "庭園 約 ¥500", note: "曹源池庭園借景嵐山，紅葉很美。從祇王寺往南走回來，不用走回頭路。" },
+  { id: uid(), date: "2026-11-24", category: "美食", variant: "B", name: "天龍寺 精進料理「篩月」午餐", time: "12:30", address: "Tenryu-ji Shigetsu, Kyoto", lat: 35.0158, lng: 135.6738, noTravel: true, hours: "午餐約 11:00–14:00，下午 2 點停止營業（請查官網／是否需要預約）", note: "11:00 開門，建議 12:30 前入座，避免客滿或來不及。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "B", name: "渡月橋", time: "13:30", address: "Togetsukyo Bridge, Kyoto", lat: 35.0094, lng: 135.6779, hours: "24 小時", ticket: "免費", note: "嵐山地標。想體驗的話可以在橋下划船（現場買票，我沒查價格與時間）。" },
+  { id: uid(), date: "2026-11-24", category: "住宿", variant: "B", name: "回旅館取行李", time: "14:45", address: "Daiya Ryokan Kyoto", lat: 34.9877, lng: 135.7587, travelMode: "電車", travelMin: 45, travelNote: "估算：約 14:00 離開渡月橋，步行到 JR 嵯峨嵐山站約 15 分 + JR 約 17 分 + 步行到旅館約 12 分；請用 Google Maps 確認", note: "取回行李。" },
+  { id: uid(), date: "2026-11-24", category: "住宿", variant: "B", name: "Ebisu 804 入住", time: "16:30", address: "Ebisuhonmachi Naniwa Osaka", lat: 34.6537, lng: 135.5013, travelMode: "電車", travelMin: 85, travelNote: "估算：約 15–20 分後從旅館出發，步行到京都站 → JR 京都線到大阪 → 環狀線到新今宮 → 步行；請用 Google Maps 查實際班次", hours: "Check-in 時間請向房東確認", note: "先放行李，請提前聯絡房東能否 16:30 左右入住或寄放。明天要 USJ，晚上早點休息。" },
+  { id: uid(), date: "2026-11-24", category: "景點", variant: "B", name: "新世界・通天閣（選擇性）", time: "17:30", address: "Tsutenkaku, Osaka", lat: 34.6525, lng: 135.5063, hours: "展望台約 10:00 – 19:00（請查官網）", ticket: "展望台約 ¥1,000", note: "離住處步行可到，趁天黑前看夕陽；累了可以直接去吃晚餐。" },
+  { id: uid(), date: "2026-11-24", category: "美食", variant: "B", name: "新世界晚餐（串炸）", time: "18:30", address: "Shinsekai, Osaka", lat: 34.6523, lng: 135.5058, hours: "店家各異", note: "21:00 前回住處，25 日 06:15 就要出發去 USJ。" },
   { id: uid(), date: '2026-11-25', category: '景點', name: '前往 USJ・開園前排隊', time: '07:30', address: 'Universal Studios Japan, Osaka', lat: 34.6654, lng: 135.4323, travelMode: '電車', travelMin: 40, travelNote: '估算：Ebisucho 站 → 轉車（新今宮／西九條）→ Universal City，路線規劃約 38 分；06:15 左右出發，請用 Google Maps 查實際班次', hours: '官方 09:00 開園，實際約 08:15–09:00 入園（以官網為準）', ticket: 'Express 4 ～トロッコ＆ジョーズ～', note: '07:30 前到門口排隊。出發前先下載 USJ 官方 App 並登入，票放手機。' },
   park('08:30', '飛天翼龍（直接排）', { note: '開園後直奔，早上排隊最短。身高需 132–198 公分，先寄放隨身物品。' }),
   park('09:30', 'JAWS（直接排）', { note: '早上較好排。與飛天翼龍、侏羅紀公園同一區，走路少。' }),
@@ -404,7 +423,19 @@ createApp({
 
     const wd = d => WD[new Date(d + 'T00:00:00').getDay()];
     const flightById = id => FLIGHTS.find(f => f.id === id);
-    const dayItems = computed(() => items.value.filter(i => i.date === selectedDate.value));
+    // A day may hold alternative plans: items with variant 'A' / 'B' show only while that plan is selected (no variant = always shown).
+    const VARIANT_KEY = 'trip-variant';
+    let savedV = {};
+    try { savedV = JSON.parse(localStorage.getItem(VARIANT_KEY)) || {}; } catch {}
+    const variantPick = reactive({ ...savedV }); // { '2026-11-24': 'A' } per device
+    watch(variantPick, () => { try { localStorage.setItem(VARIANT_KEY, JSON.stringify(variantPick)); } catch {} }, { deep: true });
+    const variantLabel = { A: '方案 A：有船票', B: '方案 B：沒船票（備案）' };
+    const variantsOf = d => [...new Set(items.value.filter(i => i.date === d && i.variant).map(i => i.variant))].sort();
+    const pickOf = d => { const v = variantsOf(d); return v.length ? (v.includes(variantPick[d]) ? variantPick[d] : v[0]) : ''; };
+    const isShown = i => !i.variant || i.variant === pickOf(i.date);
+    const dayVariants = computed(() => variantsOf(selectedDate.value));
+    const activeVariant = computed(() => pickOf(selectedDate.value));
+    const dayItems = computed(() => items.value.filter(i => i.date === selectedDate.value && isShown(i)));
 
     /* ----- category styling ----- */
     const catEmoji = c => ({ 景點: '🏯', 住宿: '🏨', 美食: '🍜', 購物: '🛍️', 航班: '✈️', 其他: '📌' }[c] || '📌');
@@ -431,7 +462,7 @@ createApp({
       if (it.date === '2026-11-22') return KIX;
       return null;
     };
-    const MODE_ICON = { 步行: '🚶', 電車: '🚇', 巴士: '🚌', 開車: '🚗', 計程車: '🚕' };
+    const MODE_ICON = { 步行: '🚶', 電車: '🚇', 巴士: '🚌', 開車: '🚗', 計程車: '🚕', 遊船: '⛵' };
     const travel = (it, idx) => {
       if (+it.travelMin > 0) { // manual entry wins over the estimate
         return { icon: MODE_ICON[it.travelMode] || '🚇', text: fmtMin(Math.round(+it.travelMin)), from: it.travelNote || '', manual: true };
@@ -534,10 +565,10 @@ createApp({
     const modal = ref(null);
     const confirmDel = ref(false);
     const saving = ref(false);
-    const blank = () => ({ id: null, date: selectedDate.value, category: '景點', name: '', address: '', hours: '', ticket: '', note: '', time: '', cost: null, lat: null, lng: null, noTravel: false, travelMode: '', travelMin: null, travelNote: '' });
+    const blank = () => ({ id: null, date: selectedDate.value, category: '景點', name: '', address: '', hours: '', ticket: '', note: '', time: '', cost: null, lat: null, lng: null, noTravel: false, variant: pickOf(selectedDate.value), travelMode: '', travelMin: null, travelNote: '' });
     const form = reactive(blank());
     const openAdd = () => { Object.assign(form, blank()); confirmDel.value = false; modal.value = 'plan'; };
-    const openEdit = it => { Object.assign(form, blank(), JSON.parse(JSON.stringify(it))); confirmDel.value = false; modal.value = 'plan'; };
+    const openEdit = it => { Object.assign(form, blank(), { variant: '' }, JSON.parse(JSON.stringify(it))); confirmDel.value = false; modal.value = 'plan'; };
     const closeModal = () => { modal.value = null; confirmDel.value = false; };
 
     const geocode = async q => {
@@ -582,8 +613,12 @@ createApp({
           const ids = dayItems.value.map(i => i.id);
           const [m] = ids.splice(oldIndex, 1); ids.splice(newIndex, 0, m);
           const map = Object.fromEntries(items.value.map(i => [i.id, i]));
+          const shown = new Set(ids);
+          const dayAll = items.value.filter(i => i.date === selectedDate.value);
+          let k = 0; // visible items take the reordered slots; hidden-plan items keep theirs
+          const dayNew = dayAll.map(i => (shown.has(i.id) ? map[ids[k++]] : i));
           const rest = items.value.filter(i => i.date !== selectedDate.value);
-          items.value = [...rest, ...ids.map(id => map[id])];
+          items.value = [...rest, ...dayNew];
         },
       });
     };
@@ -734,13 +769,15 @@ createApp({
       return FLIGHTS.find(f => new Date(`${f.date}T${f.dep}:00`).getTime() > now) || null;
     });
     const shopDone = computed(() => shop.value.filter(s => s.done).length);
-    const todayItems = computed(() => countInfo.value.mode === 'during' ? items.value.filter(i => i.date === todayStr()) : []);
+    const todayItems = computed(() => countInfo.value.mode === 'during' ? items.value.filter(i => i.date === todayStr() && isShown(i)) : []);
     const goTo = id => { tab.value = id; window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
     const fabAction = () => ({ plan: openAdd, shop: openShop, cost: () => openExp(null) }[tab.value]());
     const resetAll = () => { if (confirm('用程式內建的行程覆蓋目前所有行程（購物清單與花費不受影響）？你手動新增或修改的行程會被取代。')) { items.value = defaultItems(); selectedDate.value = days[0]; } };
 
     return {
+      buses: BUSES, busDay: d => WD[new Date(d + 'T00:00:00').getDay()] + ' ' + new Date(d + 'T00:00:00').getDate() + ' Nov',
+      variantPick, variantLabel, dayVariants, activeVariant,
       sync, connectSync, disconnectSync,
       todos, tform, todoCats: TODO_CATS, openTodo, saveTodo, deleteTodo, todoEmoji, todoImg, todoCat, todoFilter, todoOnlyImportant,
       todoPending, todoDone, todoLeft, todoFinished, todoPct, todoCatCount, dueInfo, stickerFail,
