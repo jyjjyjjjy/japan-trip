@@ -96,8 +96,13 @@ const defaultItems = () => [
   park('14:50', '任天堂園區自由逛', { note: '耀西冒險、庫巴城堡、商店與餐廳。14:00 的 NoLimit 遊行會錯過，可放棄。' }),
   park('16:00', '小黃人園區與其他想玩的', { note: '小黃人、好萊塢區。看 App 即時排隊時間調整。' }),
   park('17:30', '晚餐・燈飾', { category: '美食', note: '官方 21:00 關園，建議 20:30 前離園，回住處好好休息。' }),
-  { id: uid(), date: '2026-11-26', category: '景點', name: '（白天行程待安排）', note: '' },
-  { id: uid(), date: '2026-11-26', category: '其他', name: '空庭溫泉 私湯（已預約）', time: '20:30', address: 'Solaniwa Onsen Osaka Bay Tower, Osaka', lat: 34.6657, lng: 135.4606, travelMode: '電車', travelMin: 35, travelNote: '估算：從 Ebisu 住處搭電車到弁天町站約 30–35 分再步行 3–4 分；如果白天行程在別處，請改成實際交通時間，並用 Google Maps 確認', hours: '營業 11:00–23:00，最後入館 22:00（以官網為準）；私湯每次 90 分鐘', ticket: '私湯 Standard ¥8,800 / 和式 ¥12,100 / 西式含帳篷桑拿 ¥15,400（90 分鐘），另需入館費', note: '20:30–22:00 私湯。20:15 前到櫃檯報到。請先向店家確認私湯入場資格（大阪府條例對一起入浴的人有限制）。結束後回住處約 35 分，約 22:45 到家。' },
+  { id: uid(), date: "2026-11-26", category: "景點", name: "大阪城天守閣", time: "10:00", address: "Osaka Castle, Osaka", lat: 34.6873, lng: 135.5262, hours: "天守閣約 09:00–17:00（最後入館約 16:30，請查官網）", ticket: "天守閣約 ¥1,200（請查官網）", note: "約 09:15 從 Ebisu 出發（地鐵約 25–30 分，估算）。開門前後到比較不用排隊；天守閣內是博物館，頂樓可看市景，想省時間也可以只在外面拍照。" },
+  { id: uid(), date: "2026-11-26", category: "景點", name: "西之丸庭園（賞楓）", time: "11:30", address: "Nishinomaru Garden, Osaka Castle, Osaka", lat: 34.6866, lng: 135.522, hours: "約 09:00–17:00（請查官網，秋季開放時段可能不同）", ticket: "約 ¥200（請查官網）", note: "11 月底是大阪城的賞楓時期，庭園裡可以拍天守閣配紅葉。" },
+  { id: uid(), date: "2026-11-26", category: "美食", name: "午餐（大阪城周邊）", time: "12:30", note: "大阪城公園內有餐廳商場「JO-TERRACE OSAKA」，我沒查營業時間，也可以改在森之宮或京橋一帶吃。" },
+  { id: uid(), date: "2026-11-26", category: "景點", name: "大阪城公園散步（選擇性）", time: "14:00", address: "Osaka Castle Park, Osaka", lat: 34.6873, lng: 135.5262, hours: "公園 24 小時開放", ticket: "免費", note: "護城河邊散步拍照；累了可以跳過，15:30 前一定要往大阪港出發。" },
+  { id: uid(), date: "2026-11-26", category: "景點", name: "天保山大摩天輪", time: "16:45", address: "Tempozan Giant Ferris Wheel, Osaka", lat: 34.6547, lng: 135.4292, hours: "營業時間與最後上車時間請查官網", ticket: "票價請查官網", note: "從大阪城搭地鐵中央線到大阪港站約 35 分（估算），再步行約 5–8 分。日落約 16:50，趁天色轉藍時上去看夕陽與夜景。一圈約 15 分鐘，可選透明底的「Sea-through」車廂（可能要另外排隊）。" },
+  { id: uid(), date: "2026-11-26", category: "美食", name: "天保山市場晚餐", time: "17:30", address: "Tempozan Marketplace, Osaka", lat: 34.6537, lng: 135.4297, hours: "店家各異", note: "天保山市場裡有「なにわ食いしんぼ橫丁」復古美食街。吃完可在附近逛逛，19:30 前往弁天町。" },
+  { id: uid(), date: "2026-11-26", category: "其他", name: "空庭溫泉 私湯（已預約）", time: "20:30", address: "Solaniwa Onsen Osaka Bay Tower, Osaka", lat: 34.6657, lng: 135.4606, hours: "營業 11:00–23:00，最後入館 22:00（以官網為準）；私湯每次 90 分鐘", ticket: "私湯 Standard ¥8,800 / 和式 ¥12,100 / 西式含帳篷桑拿 ¥15,400（90 分鐘），另需入館費", note: "20:30–22:00 私湯。20:15 前到櫃檯報到。請先向店家確認私湯入場資格（大阪府條例對一起入浴的人有限制）。結束後回住處約 35 分，約 22:45 到家。" },
   { id: uid(), date: '2026-11-27', category: '美食', name: '（待安排）', note: '' },
   { id: uid(), date: '2026-11-28', category: '購物', name: '（待安排）', note: '' },
   { id: uid(), date: '2026-11-29', category: '航班', flightId: 'f3', name: 'VN335 KIX → HAN' },
@@ -126,6 +131,16 @@ const TODO_CATS = [PREP_CAT, '食物', '衣服', '美容', '門票', '其它'];
 const PREP_IMPORTANT = ['護照', 'Visit Japan Web 填寫', 'eSIM', '旅遊保險'];
 // the former "出發前檢查清單" items become to-dos of category 出發前準備
 const prepTodo = (c, id) => ({ id, name: c.text, category: PREP_CAT, priority: PREP_IMPORTANT.includes(c.text) ? '重要' : '一般', due: '', note: c.note || '', link: '', done: !!c.done });
+// to-dos added after launch: seeded once per trip (meta.extraSeed) with fixed ids, so phones that already hold data receive them too
+const EXTRA_VERSION = 1;
+const EXTRA_TODOS = [
+  { id: 'seed-daiya-checkout', name: '聯絡 Daiya Ryokan：24 日提早退房、行李寄放', category: PREP_CAT, priority: '重要', due: '2026-11-19',
+    note: '確認 24 日 07:00 能否退房（前一晚先結帳）、行李可放到幾點（預計 16:30–17:00 回來取）；22 日 10:30 能否先寄放行李。', link: '', done: false },
+  { id: 'seed-hozugawa', name: '確認保津川下り：當日船票與運航狀況', category: '門票', priority: '重要', due: '2026-11-23',
+    note: '24 日 08:15 到龜岡乘船處看當日券（8:30 前買）。前一晚與出發前再看官網運航公告；有 09:30 前出發的船 → App 切「方案 A」，否則切「方案 B」。', link: 'https://www.hozugawakudari.jp/emergency/43635', done: false },
+  { id: 'seed-solaniwa', name: '確認空庭溫泉私湯入場資格與預約', category: PREP_CAT, priority: '重要', due: '2026-11-19',
+    note: '26 日 20:30 私湯（90 分鐘）。大阪府條例對一起入浴的人有限制，請向店家確認兩人能否一起使用；同時確認入館費、付款方式與報到時間。', link: 'https://solaniwa.com/en-us/price', done: false },
+];
 const exampleTodos = () => [
   { id: uid(), name: '帶給男朋友的本地食物', category: '食物', priority: '重要', due: '', note: '挑不易壞、可托運的；先確認日本入境可帶的食品', link: '', done: false },
   { id: uid(), name: '買旅行新衣服', category: '衣服', priority: '一般', due: '', note: '11 月底京阪早晚約 5–15°C，帶保暖層次', link: '', done: false },
@@ -361,6 +376,15 @@ createApp({
 
     const firstSnap = {};
     let prepBusy = false;
+    const seedExtras = () => {
+      if ((meta.value.extraSeed || 0) >= EXTRA_VERSION) return;
+      const connected = !!(syncOn && sync.code && fdb);
+      if (connected && !(firstSnap.todos && firstSnap.meta)) return; // wait for the cloud copy first
+      const have = new Set(todos.value.map(t => t.id));
+      EXTRA_TODOS.forEach(t => { if (!have.has(t.id)) todos.value.push({ ...t }); });
+      meta.value.extraSeed = EXTRA_VERSION;
+    };
+    const seedAll = () => { seedPrep(); seedExtras(); };
     const seedPrep = async () => {
       if (meta.value.prepSeeded || prepBusy) return;
       const connected = !!(syncOn && sync.code && fdb);
@@ -390,7 +414,7 @@ createApp({
       Object.keys(stores).forEach(key => {
         unsubs.push(docOf(key).onSnapshot(snap => {
           sync.ok = true; sync.status = '已同步 ✓';
-          const seen = () => { firstSnap[key] = true; if (key === 'todos' || key === 'meta') seedPrep(); };
+          const seen = () => { firstSnap[key] = true; if (key === 'todos' || key === 'meta') seedAll(); };
           if (snap.metadata.hasPendingWrites) { seen(); return; }
           if (!snap.exists) { pushRemote(key); seen(); return; } // first device uploads its data
           const remote = snap.data().data;
@@ -420,7 +444,7 @@ createApp({
       sync.code = c; sync.input = c; localStorage.setItem('trip-code', c); startSync();
     };
     const disconnectSync = () => { stopSync(); sync.code = ''; localStorage.removeItem('trip-code'); sync.status = '未連線'; };
-    onMounted(() => { startSync(); if (!syncOn || !sync.code) seedPrep(); });
+    onMounted(() => { startSync(); if (!syncOn || !sync.code) seedAll(); });
 
     const wd = d => WD[new Date(d + 'T00:00:00').getDay()];
     const flightById = id => FLIGHTS.find(f => f.id === id);
