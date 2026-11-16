@@ -50,16 +50,17 @@ const defaultItems = () => [
   { id: uid(), date: '2026-11-22', category: '景點', name: '東福寺', time: '14:45', address: 'Tofuku-ji, Kyoto', lat: 34.9768, lng: 135.7740, hours: '紅葉季約 08:30 – 16:30（最後入場約 16:00）', ticket: '通天橋 紅葉季約 ¥1,000（以官網為準）', note: '稻荷站搭 JR 奈良線 1 站。通天橋紅葉是重點；建議 15:00 前入場，留足 1–1.5 小時。' },
   { id: uid(), date: '2026-11-22', category: '住宿', name: 'Daiya Ryokan 入住・休息', time: '16:30', address: 'Daiya Ryokan Kyoto', lat: 34.9877, lng: 135.7587, hours: 'Check-in 15:00', note: '回旅館入住、洗澡休息，補眠。' },
   { id: uid(), date: '2026-11-22', category: '美食', name: '晚餐（待定）', time: '18:00', note: '午餐吃得比較晚，晚餐吃輕一點，旅館附近簡單吃就好；請在 21:30 前睡覺（23 日 05:15 起床）。' },
-  { id: uid(), date: '2026-11-23', category: '景點', name: '清水寺（清晨拍照）', time: '06:00', address: 'Kiyomizu-dera, Kyoto', lat: 34.9949, lng: 135.7850, travelMode: '計程車', travelMin: 15, travelNote: '估算：05:30 左右從旅館搭計程車；或搭京阪到清水五條再走上坡約 25 分。請用 Google Maps 查首班車', hours: '約 06:00 開門（請以官網為準）', ticket: '約 ¥500', note: '06:00 抵達拍照，日出約 06:30 前後，天還暗小心路滑。最晚 06:40 離開，07:00 要到一期和服。' },
-  { id: uid(), date: '2026-11-23', category: '其他', name: '一期和服：穿戴和服（已預約）', time: '07:00', address: '一期和服 京都', travelMode: '步行', travelMin: 15, travelNote: '估算：清水寺 → 和服店，請依店家實際地址用 Google Maps 確認（編輯此卡片填入地址即可自動定位）', hours: '07:00 預約穿戴', note: '穿戴約 45–60 分。向店家確認：歸還截止時間 15:00、可否寄放原本衣物與行李、天冷是否提供披肩或外套。' },
-  { id: uid(), date: '2026-11-23', category: '美食', name: '早餐・整理（待定）', time: '08:15', note: '穿好和服後在店附近簡單吃早餐，9:15 前移動到攝影師集合點。' },
-  { id: uid(), date: '2026-11-23', category: '其他', name: '攝影師拍攝（已預約）', time: '09:30', hours: '09:30 集合', note: '請向攝影師確認集合地點（填入地址可自動定位）、拍攝時長與成片交付方式。' },
-  { id: uid(), date: '2026-11-23', category: '景點', name: '二年坂・產寧坂（和服散步）', time: '11:00', address: 'Sannenzaka, Kyoto', lat: 34.9979, lng: 135.7800, hours: '商店約 10:00 開', ticket: '免費', note: '穿和服走石板坡道要慢，鞋底小心。' },
-  { id: uid(), date: '2026-11-23', category: '美食', name: '午餐（待定）', time: '11:45', note: '清水寺、二年坂一帶找一家，穿和服用餐盡量選有座位的店。' },
-  { id: uid(), date: '2026-11-23', category: '景點', name: '八坂神社・花見小路（和服散步）', time: '12:45', address: 'Yasaka Shrine, Kyoto', lat: 35.0036, lng: 135.7785, hours: '神社境內 24 小時', ticket: '免費', note: '祇園的石板路拍照很好看。13:45 前開始往和服店方向走。' },
-  { id: uid(), date: '2026-11-23', category: '其他', name: '換回衣服・歸還和服（15:00 前）', time: '14:00', address: '一期和服 京都', note: '最晚 15:00 前歸還，更衣約 20–30 分，建議 14:00 就到店，不要卡時間。' },
-  { id: uid(), date: '2026-11-23', category: '住宿', name: '回旅館休息', time: '15:30', address: 'Daiya Ryokan Kyoto', lat: 34.9877, lng: 135.7587, note: '起得早，下午補眠。' },
-  { id: uid(), date: '2026-11-23', category: '美食', name: '晚餐（待定）', time: '18:00', note: '錦市場／先斗町一帶，或旅館附近。明天 07:15 要退房，今晚請早點睡。' },
+  { id: uid(), date: "2026-11-23", category: "景點", name: "清水寺（清晨拍照）", time: "06:00", address: "Kiyomizu-dera, Kyoto", lat: 34.9949, lng: 135.785, travelMode: "巴士", travelMin: 45, travelNote: "04:45 起床，05:15 從旅館出發 → 步行約 12–15 分到「地下鐵九條站前（大石橋）」巴士站（位置請用 Google Maps 確認）→ 05:31 搭 202（或 05:41 搭 207，往東福寺・清水寺・祇園方向）→ 在「五條坂」下車（攻略寫的下車站名尚待確認）→ 步行上山約 10 分。備案：搭計程車約 15 分", hours: "06:00 開門（開門資訊：https://www.kiyomizudera.or.jp/news/open-hour.php）", ticket: "約 ¥500", note: "06:00 開門就進，仁王門・清水舞台・奧之院・音羽瀑布依現場動線慢慢走。日出約 06:30 前後，天還暗小心路滑。最晚 06:40 離開。\n出發前再確認首班車：\n202 時刻表 https://www2.city.kyoto.lg.jp/kotsu/busdia/hyperdia/11812005.htm\n207 時刻表 https://www2.city.kyoto.lg.jp/kotsu/busdia/hyperdia/11812006.htm\n（攻略寫 202 首班 05:31、207 首班 05:41，平日與假日相同；早起較有機會避開人潮，但不保證完全沒人）" },
+  { id: uid(), date: "2026-11-23", category: "景點", name: "三年坂 → 二年坂 → 八坂之塔（清晨無人街景）", time: "06:40", address: "Sannenzaka, Kyoto", lat: 34.9979, lng: 135.78, hours: "商店約 10:00 才開，清晨最安靜", ticket: "免費", note: "下山沿路拍照，商家幾乎都還沒開，這段是來拍照、散步的。和服店在祇園（步行約 10–12 分），7:00 要到，所以這段邊走邊拍、不要停太久。八坂之塔和八坂神社是不同的地方喔。" },
+  { id: uid(), date: "2026-11-23", category: "其他", name: "一期和服：穿戴和服（已預約）", time: "07:00", address: "〒605-0073 京都府京都市東山区祇園町北側347番地154 祇園はんなりビル 2階A（一期和服）", lat: 35.0036, lng: 135.7755, hours: "07:00 預約穿戴", note: "從三年坂邊走邊拍到店約 10–12 分（估算，座標為估算位置，請用 Google Maps 確認）。穿戴約 45–60 分。向店家確認：歸還截止時間 15:00、可否寄放原本衣物與行李、天冷是否提供披肩或外套。" },
+  { id: uid(), date: "2026-11-23", category: "美食", name: "早餐：前田咖啡（攻略推薦）", time: "08:15", address: "415-2 Minamimachi, Higashiyama Ward, Kyoto, 605-0824, Japan", lat: 34.9994, lng: 135.7787, hours: "07:00 – 15:30", note: "Google Maps：https://maps.app.goo.gl/Jby9G72ALN2zWpWL6\n位在二年坂一帶，從和服店步行約 10 分（估算，座標為估算位置）。攻略作者覺得味道普通，只當行程紀錄、不特別推薦（咖哩飯肉很少）；也可換自己喜歡的早餐店。08:15 入座、約 09:00 離開，9:30 要到圓山公園集合。" },
+  { id: uid(), date: "2026-11-23", category: "其他", name: "攝影師拍攝（已預約）", time: "09:30", address: "Maruyama Park, Higashiyama Ward, Kyoto（円山公園内 しだれ桜前，Gion Maruyamado 集合點）", lat: 35.004, lng: 135.7812, hours: "09:30 集合", note: "集合點：Gion Maruyamado，圓山公園內「しだれ桜（垂枝櫻）」前。請向攝影師確認拍攝時長與成片交付方式。" },
+  { id: uid(), date: "2026-11-23", category: "景點", name: "二年坂・產寧坂（和服散步）", time: "11:00", address: "Sannenzaka, Kyoto", lat: 34.9979, lng: 135.78, hours: "商店約 10:00 開", ticket: "免費", note: "穿和服走石板坡道要慢，鞋底小心。" },
+  { id: uid(), date: "2026-11-23", category: "美食", name: "午餐（待定）", time: "11:45", note: "清水寺、二年坂一帶找一家，穿和服用餐盡量選有座位的店。" },
+  { id: uid(), date: "2026-11-23", category: "景點", name: "八坂神社・花見小路（和服散步）", time: "12:45", address: "Yasaka Shrine, Kyoto", lat: 35.0036, lng: 135.7785, hours: "神社境內 24 小時", ticket: "免費", note: "祇園的石板路拍照很好看。13:45 前開始往和服店方向走。" },
+  { id: uid(), date: "2026-11-23", category: "其他", name: "換回衣服・歸還和服（15:00 前）", time: "14:00", address: "〒605-0073 京都府京都市東山区祇園町北側347番地154 祇園はんなりビル 2階A（一期和服）", lat: 35.0036, lng: 135.7755, note: "最晚 15:00 前歸還，更衣約 20–30 分，建議 14:00 就到店，不要卡時間。" },
+  { id: uid(), date: "2026-11-23", category: "住宿", name: "回旅館休息", time: "15:30", address: "Daiya Ryokan Kyoto", lat: 34.9877, lng: 135.7587, note: "早起真的很累，下午補眠（攻略也這樣建議）。" },
+  { id: uid(), date: "2026-11-23", category: "美食", name: "晚餐（待定）", time: "18:00", note: "錦市場／先斗町一帶，或旅館附近。明天 07:00 要退房，今晚請早點睡。" },
   { id: uid(), date: "2026-11-24", category: "住宿", name: "退房 Daiya Ryokan（寄放行李）", time: "07:00", address: "Daiya Ryokan Kyoto", lat: 34.9877, lng: 135.7587, noTravel: true, hours: "Check-out 07:00（比原本早 15 分，才趕得上 08:30 前買船票；建議前一晚先結帳）", note: "行李寄放在旅館，傍晚回來取。請提前聯絡旅館：能否 07:00 退房、行李可放到幾點。" },
   { id: uid(), date: "2026-11-24", category: "景點", name: "保津川下り 乗船場（先看當日船票）", time: "08:15", address: "〒621-0005 京都府亀岡市保津町下中島２", lat: 35.0174, lng: 135.5866, travelMode: "電車", travelMin: 70, travelNote: "估算：07:05 從旅館出發，步行約 12 分到京都站，搭 JR 山陰線（嵯峨野線）到龜岡站約 40 分，再步行到乘船處約 10 分；請用 Google Maps 查班次，目標 08:15 前抵達", hours: "08:00 – 08:30（售票）", ticket: "當日券（現場購買）", note: "*最好 8:30 之前到買當日券，遲了會買不到\n*當天看官方網站可以知道當天有沒有開船\nhttps://www.hozugawakudari.jp/emergency/43635\n\n【決定方式】有 09:30 前出發的船 → 上方切換「方案 A」；沒有或太晚 → 切換「方案 B」，搭 JR 回嵯峨嵐山走備案路線。" },
   { id: uid(), date: "2026-11-24", category: "景點", variant: "A", name: "搭乘保津川下り（約 2 小時）", time: "09:00", address: "〒621-0005 京都府亀岡市保津町下中島２", lat: 35.0174, lng: 135.5866, noTravel: true, hours: "約 2 小時（以官網為準）", note: "以現場買到的班次為準；若出發晚於 09:30，建議改方案 B。" },
@@ -132,12 +133,14 @@ const PREP_IMPORTANT = ['護照', 'Visit Japan Web 填寫', 'eSIM', '旅遊保�
 // the former "出發前檢查清單" items become to-dos of category 出發前準備
 const prepTodo = (c, id) => ({ id, name: c.text, category: PREP_CAT, priority: PREP_IMPORTANT.includes(c.text) ? '重要' : '一般', due: '', note: c.note || '', link: '', done: !!c.done });
 // to-dos added after launch: seeded once per trip (meta.extraSeed) with fixed ids, so phones that already hold data receive them too
-const EXTRA_VERSION = 1;
+const EXTRA_VERSION = 2;
 const EXTRA_TODOS = [
   { id: 'seed-daiya-checkout', name: '聯絡 Daiya Ryokan：24 日提早退房、行李寄放', category: PREP_CAT, priority: '重要', due: '2026-11-19',
     note: '確認 24 日 07:00 能否退房（前一晚先結帳）、行李可放到幾點（預計 16:30–17:00 回來取）；22 日 10:30 能否先寄放行李。', link: '', done: false },
   { id: 'seed-hozugawa', name: '確認保津川下り：當日船票與運航狀況', category: '門票', priority: '重要', due: '2026-11-23',
     note: '24 日 08:15 到龜岡乘船處看當日券（8:30 前買）。前一晚與出發前再看官網運航公告；有 09:30 前出發的船 → App 切「方案 A」，否則切「方案 B」。', link: 'https://www.hozugawakudari.jp/emergency/43635', done: false },
+  { id: 'seed-bus202', name: '確認 23 日清水寺首班公車（202／207）', category: PREP_CAT, priority: '重要', due: '2026-11-22',
+    note: '地下鐵九條站前（大石橋）上車，往東福寺・清水寺・祇園：202 首班 05:31、207 首班 05:41（攻略寫平日與假日相同）。出發前用官方時刻表再確認一次，並看清水寺 06:00 開門資訊；下車站名（五條坂？）也一併確認。', link: 'https://www2.city.kyoto.lg.jp/kotsu/busdia/hyperdia/11812005.htm', done: false },
   { id: 'seed-solaniwa', name: '確認空庭溫泉私湯入場資格與預約', category: PREP_CAT, priority: '重要', due: '2026-11-19',
     note: '26 日 20:30 私湯（90 分鐘）。大阪府條例對一起入浴的人有限制，請向店家確認兩人能否一起使用；同時確認入館費、付款方式與報到時間。', link: 'https://solaniwa.com/en-us/price', done: false },
 ];
