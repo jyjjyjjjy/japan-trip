@@ -43,7 +43,8 @@ const park = (time, name, extra = {}) => ({ id: uid(), date: '2026-11-25', categ
 
 const defaultItems = () => [
   { id: uid(), date: "2026-11-21", category: "其他", name: "抵達 KLIA（Grab，16:15 從家出發）", time: "17:30", address: "Kuala Lumpur International Airport (KLIA), Sepang", lat: 2.7456, lng: 101.7099, travelMode: "開車", travelMin: 75, travelNote: "估算：16:15 從家搭 Grab，約 1–1.5 小時，依家的位置與塞車調整；請上 Grab 看預估時間", hours: "VN680 20:10 起飛（請確認航廈，越南航空通常是 KLIA 第一航廈）", note: "17:30 前到機場，先辦好 VN680 報到、託運行李（HAN 轉機的行李請確認是否直掛到關西機場 KIX）。護照、Visit Japan Web QR Code、eSIM 先在手機準備好。" },
-  { id: uid(), date: "2026-11-21", category: "美食", name: "晚餐：麥當勞（KLIA）", time: "18:15", address: "McDonald's KLIA", noTravel: true, hours: "店家營業時間請現場確認", note: "辦完報到再吃，吃完留時間過安檢與出境，19:30 前到登機口附近。" },
+  { id: uid(), date: "2026-11-21", category: "美食", name: "晚餐：麥當勞（KLIA）", time: "18:15", address: "McDonald's KLIA", noTravel: true, hours: "店家營業時間請現場確認", note: "辦完報到再吃，約 18:50 前吃完，接著過安檢與出境，再去衛星廈領日幣。" },
+  { id: uid(), date: "2026-11-21", category: "購物", name: "KLIA T1 衛星廈（Satellite Building）CIMB 櫃檯：領取預先兌換的日幣", time: "19:15", address: "KLIA Terminal 1 Satellite Building, CIMB Bank", lat: 2.7456, lng: 101.7099, noTravel: true, hours: "CIMB 櫃檯 24 小時營業", note: "只能在過安檢、出境之後，到衛星廈的 CIMB 櫃檯領取。先報到託運、吃晚餐，過安檢與出境後搭 Aerotrain 到衛星廈。帶好護照與預訂憑證（手機截圖），領完當場點清金額。19:40 前要到登機口，若排隊太久請先去登機口確認登機時間。" },
   { id: uid(), date: '2026-11-21', category: '航班', flightId: 'f1', name: 'VN680 KUL → HAN' },
   { id: uid(), date: '2026-11-21', category: '航班', flightId: 'f2', name: 'VN334 HAN → KIX' },
   { id: uid(), date: "2026-11-22", category: "其他", name: "KIX 關西機場：和男朋友會合", time: "09:00", address: "Kansai International Airport Terminal 1, Osaka", lat: 34.432, lng: 135.2304, noTravel: true, hours: "會合時間為預估：06:55 落地、入境領行李約 1–1.5 小時", note: "男朋友 07:50 抵達難波（夜行巴士），搭南海電鐵到關西機場約 45 分，預計 08:45–09:00 到。請事先約好會合地點（建議第一航廈入境大廳），並用手機互相定位。會合後一起買 JR Haruka 車票（外國旅客優惠票請先查）。" },
